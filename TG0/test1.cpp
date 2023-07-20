@@ -62,7 +62,7 @@ int main(int argc, char** argv) {
             symbols.insert(symbols.end(), other_symbols.begin(), other_symbols.end());
         }
 
-        std::ofstream file("symbols.txt");
+        std::ofstream file("Library.txt");
         for (char symbol : symbols) {
             file << symbol;
         }
