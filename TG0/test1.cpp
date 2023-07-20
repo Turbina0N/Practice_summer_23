@@ -13,15 +13,12 @@ using namespace std;
 
 static const int N = 10000;
 static char arr[] = { 'a', 'b', 'c', 'd', 'e', 'f', ' ', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '@', '.' };
-static char order[19] = { -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1 };
-static char orderNew[19] = { -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1 };
 
 std::vector<char> CreateFile(int process_id, int world_size) {
-    srand(process_id);
+    srand(time(NULL) ^ process_id);
 
     int i;
     std::vector<int> entry(19, 0);
-    std::vector<double> probability(19, 0);
     std::vector<char> symbols;
 
     for (i = 0; i < N / world_size; ++i) {
@@ -29,10 +26,6 @@ std::vector<char> CreateFile(int process_id, int world_size) {
         char symbol = arr[index];
         entry[index]++;
         symbols.push_back(symbol);
-    }
-
-    for (int i = 0; i < probability.size(); i++) {
-        probability[i] = entry[i] / (double)(N / world_size);
     }
 
     return symbols;
@@ -63,9 +56,16 @@ int main(int argc, char** argv) {
         }
 
         std::ofstream file("Library.txt");
+        if (!file) {
+            std::cerr << "Unable to open file for writing\n";
+            MPI_Finalize();
+            return 1;
+        }
+
         for (char symbol : symbols) {
             file << symbol;
         }
+        file.close();
     }
     else {
         MPI_Send(symbols.data(), symbols.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD);
