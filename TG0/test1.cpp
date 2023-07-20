@@ -6,32 +6,31 @@
 #include <ctime>
 #include <vector>
 #include <string>
-#include <algorithm>
-#include <Windows.h>           
+#include <algorithm>          
 #include <sstream>
 
-using namespace std;//предусмотрение возможности изменять размер массива arr
-static const int N = 10000; //количество всех символов в файле
-static char arr[] = { 'ж', 'з', 'и', 'к', 'л', 'м', ' ', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '@', '.' };
+using namespace std;//ГЇГ°ГҐГ¤ГіГ±Г¬Г®ГІГ°ГҐГ­ГЁГҐ ГўГ®Г§Г¬Г®Г¦Г­Г®Г±ГІГЁ ГЁГ§Г¬ГҐГ­ГїГІГј Г°Г Г§Г¬ГҐГ° Г¬Г Г±Г±ГЁГўГ  arr
+static const int N = 10000; //ГЄГ®Г«ГЁГ·ГҐГ±ГІГўГ® ГўГ±ГҐГµ Г±ГЁГ¬ГўГ®Г«Г®Гў Гў ГґГ Г©Г«ГҐ
+static char arr[] = { 'Г¦', 'Г§', 'ГЁ', 'ГЄ', 'Г«', 'Г¬', ' ', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '@', '.' };
 static char order[19] = { -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1 };
 static char orderNew[19] = { -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1 };
 
-// Генерация случайных символов. Она должна быть разной для каждого процесса,
-// поэтому мы передаем номер процесса в функцию.
+// ГѓГҐГ­ГҐГ°Г Г¶ГЁГї Г±Г«ГіГ·Г Г©Г­Г»Гµ Г±ГЁГ¬ГўГ®Г«Г®Гў. ГЋГ­Г  Г¤Г®Г«Г¦Г­Г  ГЎГ»ГІГј Г°Г Г§Г­Г®Г© Г¤Г«Гї ГЄГ Г¦Г¤Г®ГЈГ® ГЇГ°Г®Г¶ГҐГ±Г±Г ,
+// ГЇГ®ГЅГІГ®Г¬Гі Г¬Г» ГЇГҐГ°ГҐГ¤Г ГҐГ¬ Г­Г®Г¬ГҐГ° ГЇГ°Г®Г¶ГҐГ±Г±Г  Гў ГґГіГ­ГЄГ¶ГЁГѕ.
 std::vector<char> CreateFile(int process_id, int world_size) {
-    srand(process_id);  // Использование идентификатора процесса как базового значения.
+    srand(process_id);  // Г€Г±ГЇГ®Г«ГјГ§Г®ГўГ Г­ГЁГҐ ГЁГ¤ГҐГ­ГІГЁГґГЁГЄГ ГІГ®Г°Г  ГЇГ°Г®Г¶ГҐГ±Г±Г  ГЄГ ГЄ ГЎГ Г§Г®ГўГ®ГЈГ® Г§Г­Г Г·ГҐГ­ГЁГї.
 
     int i;
     std::vector<int> entry(19, 0);
     std::vector<double> probability(19, 0);
-    std::vector<char> symbols;  // Возвращаемый вектор символов.
+    std::vector<char> symbols;  // Г‚Г®Г§ГўГ°Г Г№Г ГҐГ¬Г»Г© ГўГҐГЄГІГ®Г° Г±ГЁГ¬ГўГ®Г«Г®Гў.
 
-    for (i = 0; i < N / world_size; ++i)  // Генерируем N/world_size символов.
+    for (i = 0; i < N / world_size; ++i)  // ГѓГҐГ­ГҐГ°ГЁГ°ГіГҐГ¬ N/world_size Г±ГЁГ¬ГўГ®Г«Г®Гў.
     {
         int index = rand() % 19;
         char symbol = arr[index];
         entry[index]++;
-        symbols.push_back(symbol);  // Добавить символ в вектор
+        symbols.push_back(symbol);  // Г„Г®ГЎГ ГўГЁГІГј Г±ГЁГ¬ГўГ®Г« Гў ГўГҐГЄГІГ®Г°
     }
 
     for (int i = 0; i < probability.size(); i++) {
@@ -45,39 +44,39 @@ std::vector<char> CreateFile(int process_id, int world_size) {
 int main(int argc, char** argv) {
     MPI_Init(&argc, &argv);
 
-    int world_rank;  // номер этого процесса.
+    int world_rank;  // Г­Г®Г¬ГҐГ° ГЅГІГ®ГЈГ® ГЇГ°Г®Г¶ГҐГ±Г±Г .
     MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
-ъ
-    int world_size;    //общее количество процессов.
+Гє
+    int world_size;    //Г®ГЎГ№ГҐГҐ ГЄГ®Г«ГЁГ·ГҐГ±ГІГўГ® ГЇГ°Г®Г¶ГҐГ±Г±Г®Гў.
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
     std::vector<char> symbols = CreateFile(world_rank, world_size);
     if (world_rank == 0) {
-        // Процесс 0 собирает все символы от всех процессов и записывает их в файл.
+        // ГЏГ°Г®Г¶ГҐГ±Г± 0 Г±Г®ГЎГЁГ°Г ГҐГІ ГўГ±ГҐ Г±ГЁГ¬ГўГ®Г«Г» Г®ГІ ГўГ±ГҐГµ ГЇГ°Г®Г¶ГҐГ±Г±Г®Гў ГЁ Г§Г ГЇГЁГ±Г»ГўГ ГҐГІ ГЁГµ Гў ГґГ Г©Г«.
         for (int i = 1; i < world_size; ++i) {
             int count;
             MPI_Status status;
 
-            // Сначала получить количество символов от другого процесса.
+            // Г‘Г­Г Г·Г Г«Г  ГЇГ®Г«ГіГ·ГЁГІГј ГЄГ®Г«ГЁГ·ГҐГ±ГІГўГ® Г±ГЁГ¬ГўГ®Г«Г®Гў Г®ГІ Г¤Г°ГіГЈГ®ГЈГ® ГЇГ°Г®Г¶ГҐГ±Г±Г .
             MPI_Probe(i, 0, MPI_COMM_WORLD, &status);
             MPI_Get_count(&status, MPI_CHAR, &count);
 
             std::vector<char> other_symbols(count);
             MPI_Recv(other_symbols.data(), count, MPI_CHAR, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            //принимает сообщение с символами от процесса i и сохраняет его в вектор
+            //ГЇГ°ГЁГ­ГЁГ¬Г ГҐГІ Г±Г®Г®ГЎГ№ГҐГ­ГЁГҐ Г± Г±ГЁГ¬ГўГ®Г«Г Г¬ГЁ Г®ГІ ГЇГ°Г®Г¶ГҐГ±Г±Г  i ГЁ Г±Г®ГµГ°Г Г­ГїГҐГІ ГҐГЈГ® Гў ГўГҐГЄГІГ®Г°
 
-            // Добавить полученные символы к нашим.
+            // Г„Г®ГЎГ ГўГЁГІГј ГЇГ®Г«ГіГ·ГҐГ­Г­Г»ГҐ Г±ГЁГ¬ГўГ®Г«Г» ГЄ Г­Г ГёГЁГ¬.
             symbols.insert(symbols.end(), other_symbols.begin(), other_symbols.end());
         }
 
-        // Записать все символы в файл.
+        // Г‡Г ГЇГЁГ±Г ГІГј ГўГ±ГҐ Г±ГЁГ¬ГўГ®Г«Г» Гў ГґГ Г©Г«.
         std::ofstream file("symbols.txt");
         for (char symbol : symbols) {
             file << symbol;
         }
     }
     else {
-        // Все остальные процессы отправляют свои символы процессу 0.
+        // Г‚Г±ГҐ Г®Г±ГІГ Г«ГјГ­Г»ГҐ ГЇГ°Г®Г¶ГҐГ±Г±Г» Г®ГІГЇГ°Г ГўГ«ГїГѕГІ Г±ГўГ®ГЁ Г±ГЁГ¬ГўГ®Г«Г» ГЇГ°Г®Г¶ГҐГ±Г±Гі 0.
         MPI_Send(symbols.data(), symbols.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD);
     }
 
