@@ -8,11 +8,14 @@
 #include <string>
 #include <algorithm>
 #include <sstream>
+#include <map>
 
 using namespace std;
 
 static const int N = 10000;
 static char arr[] = { 'a', 'b', 'c', 'd', 'e', 'f', ' ', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '@', '.' };
+static char order[19] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
+static char orderNew[19] = { -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1 };
 
 std::vector<char> CreateFile(int process_id, int world_size) {
     srand(time(NULL) ^ process_id);
@@ -131,33 +134,12 @@ vector<double> compute_probabilities(const vector<char>& symbols) {
         counts[c]++;
         total++;
     }
-
-    // Преобразование подсчетов в вероятности
+	
     vector<double> probabilities;
     for (auto& pair : counts) {
         probabilities.push_back(static_cast<double>(pair.second) / total);
     }
     return probabilities;
-}
-
-// Функции для преобразования между таблицей Хаффмана и одномерным массивом
-vector<int> to_1D(const vector<vector<int>>& C) {
-    vector<int> oneD;
-    for (const auto& row : C) {
-        oneD.insert(oneD.end(), row.begin(), row.end());
-    }
-    return oneD;
-}
-
-vector<vector<int>> to_2D(const vector<int>& oneD, int n) {
-    vector<vector<int>> C(n);
-    auto it = oneD.begin();
-    for (auto& row : C) {
-        for (int i = 0; i < n; ++i) {
-            row.push_back(*it++);
-        }
-    }
-    return C;
 }
 
 int main(int argc, char** argv) {
@@ -200,16 +182,9 @@ int main(int argc, char** argv) {
         vector<vector<int>> C(probabilities.size());
         vector<int> len(probabilities.size());
         Huffman(C, len, probabilities);
-        
-        vector<int> oneD = to_1D(C);
-        MPI_Bcast(oneD.data(), oneD.size(), MPI_INT, 0, MPI_COMM_WORLD);
     }
     else {
         MPI_Send(symbols.data(), symbols.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD);
-         // На других узлах получаем таблицу Хаффмана
-        vector<int> oneD(n * n);
-        MPI_Bcast(oneD.data(), oneD.size(), MPI_INT, 0, MPI_COMM_WORLD);
-        vector<vector<int>> C = to_2D(oneD, n);
     }
 
     MPI_Finalize();
