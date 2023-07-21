@@ -1,75 +1,76 @@
-#include <mpi.h>
-#include <iostream>
-#include <fstream>
-#include <cstdio>
-#include <cstdlib>
-#include <ctime>
-#include <vector>
-#include <string>
-#include <algorithm>
-#include <sstream>
+/*
+ * Copyright (c) 2004-2006 The Trustees of Indiana University and Indiana
+ *                         University Research and Technology
+ *                         Corporation.  All rights reserved.
+ * Copyright (c) 2006      Cisco Systems, Inc.  All rights reserved.
+ *
+ * Simple ring test program in C.
+ */
 
-using namespace std;
+#include "mpi.h"
+#include <stdio.h>
 
-static const int N = 10000;
-static char arr[] = { 'a', 'b', 'c', 'd', 'e', 'f', ' ', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '@', '.' };
+int main(int argc, char *argv[])
+{
+    int rank, size, next, prev, message, tag = 201;
 
-std::vector<char> CreateFile(int process_id, int world_size) {
-    srand(time(NULL) ^ process_id);
+    /* Start up MPI */
 
-    int i;
-    std::vector<int> entry(19, 0);
-    std::vector<char> symbols;
-
-    for (i = 0; i < N / world_size; ++i) {
-        int index = rand() % 19;
-        char symbol = arr[index];
-        entry[index]++;
-        symbols.push_back(symbol);
-    }
-
-    return symbols;
-}
-
-int main(int argc, char** argv) {
     MPI_Init(&argc, &argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-    int world_rank;
-    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+    /* Calculate the rank of the next process in the ring.  Use the
+       modulus operator so that the last process "wraps around" to
+       rank zero. */
 
-    int world_size;
-    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+    next = (rank + 1) % size;
+    prev = (rank + size - 1) % size;
 
-    std::vector<char> symbols = CreateFile(world_rank, world_size);
-    if (world_rank == 0) {
-        for (int i = 1; i < world_size; ++i) {
-            int count;
-            MPI_Status status;
+    /* If we are the "manager" process (i.e., MPI_COMM_WORLD rank 0),
+       put the number of times to go around the ring in the
+       message. */
 
-            MPI_Probe(i, 0, MPI_COMM_WORLD, &status);
-            MPI_Get_count(&status, MPI_CHAR, &count);
+    if (0 == rank) {
+        message = 10;
 
-            std::vector<char> other_symbols(count);
-            MPI_Recv(other_symbols.data(), count, MPI_CHAR, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-
-            symbols.insert(symbols.end(), other_symbols.begin(), other_symbols.end());
-        }
-
-        std::ofstream file("Library.txt");
-        if (!file) {
-            std::cerr << "Unable to open file for writing\n";
-            MPI_Finalize();
-            return 1;
-        }
-
-        for (char symbol : symbols) {
-            file << symbol;
-        }
-        file.close();
+        printf("Process 0 sending %d to %d, tag %d (%d processes in ring)\n", message, next, tag,
+               size);
+        MPI_Send(&message, 1, MPI_INT, next, tag, MPI_COMM_WORLD);
+        printf("Process 0 sent to %d\n", next);
     }
-    else {
-        MPI_Send(symbols.data(), symbols.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD);
+
+    /* Pass the message around the ring.  The exit mechanism works as
+       follows: the message (a positive integer) is passed around the
+       ring.  Each time it passes rank 0, it is decremented.  When
+       each processes receives a message containing a 0 value, it
+       passes the message on to the next process and then quits.  By
+       passing the 0 message first, every process gets the 0 message
+       and can quit normally. */
+
+    while (1) {
+        MPI_Recv(&message, 1, MPI_INT, prev, tag, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+        if (0 == rank) {
+            --message;
+            printf("Process 0 decremented value: %d\n", message);
+        }
+
+        MPI_Send(&message, 1, MPI_INT, next, tag, MPI_COMM_WORLD);
+        if (0 == message) {
+            printf("Process %d exiting\n", rank);
+            break;
+        }
     }
+
+    /* The last process does one extra send to process 0, which needs
+       to be received before the program can exit */
+
+    if (0 == rank) {
+        MPI_Recv(&message, 1, MPI_INT, prev, tag, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    }
+
+    /* All done */
 
     MPI_Finalize();
     return 0;
