@@ -158,7 +158,7 @@ int main(int argc, char** argv) {
     int world_size;
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
-    std::vector<char> symbols = CreateFile(world_rank, world_size);
+     std::vector<wchar_t> symbols = CreateFile(world_rank, world_size);
     if (world_rank == 0) {
         for (int i = 1; i < world_size; ++i) {
             int count;
