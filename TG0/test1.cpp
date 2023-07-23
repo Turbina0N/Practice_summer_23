@@ -127,9 +127,9 @@ string CodingHuffman(string s_input, string s_output, vector<vector<int>> C) {
 
 // Функция для подсчета вероятностей символов в файле
 vector<double> compute_probabilities(const vector<wchar_t>& symbols) {
-    map<char, int> counts;
+    map<wchar_t, int> counts;
     int total = 0;
-    for (char c : symbols) {
+    for (wchar_t c : symbols) {
         counts[c]++;
         total++;
     }
