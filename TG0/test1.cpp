@@ -164,7 +164,7 @@ int main(int argc, char** argv) {
             MPI_Status status;
 
             MPI_Probe(i, 0, MPI_COMM_WORLD, &status);
-            MPI_Get_count(&status, MPI_CHAR, &count);
+            MPI_Get_count(&status, MPI_WCHAR, &count);
 
             std::vector<char> other_symbols(count);
             MPI_Recv(other_symbols.data(), count, MPI_WCHAR, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
