@@ -1,7 +1,6 @@
 #include <mpi.h>
 #include <iostream>
 #include <fstream>
-#include <cstdio>
 #include <cstdlib>
 #include <ctime>
 #include <vector>
@@ -14,8 +13,6 @@ using namespace std;
 
 static const int N = 10000;
 static const std::vector<wchar_t> arr = {L'ж', L'з', L'и', L'к', L'л', L'м', L' ', L'0', L'1', L'2', L'3', L'4', L'5', L'6', L'7', L'8', L'9', L'@', L'.'};
-static char order[19] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
-static char orderNew[19] = { -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1 };
 
 std::vector<wchar_t> CreateFile(int process_id, int world_size) {
     srand(time(NULL) ^ process_id);
@@ -39,7 +36,6 @@ std::vector<wchar_t> CreateFile(int process_id, int world_size) {
 
     return symbols;
 }
-
 
 int UP(vector <double>& P, double q) {
 // n-длинна обрабатываемой части массива
@@ -158,7 +154,7 @@ int main(int argc, char** argv) {
     int world_size;
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
-     std::vector<wchar_t> symbols = CreateFile(world_rank, world_size);
+    std::vector<wchar_t> symbols = CreateFile(world_rank, world_size);
     if (world_rank == 0) {
         for (int i = 1; i < world_size; ++i) {
             int count;
@@ -167,25 +163,25 @@ int main(int argc, char** argv) {
             MPI_Probe(i, 0, MPI_COMM_WORLD, &status);
             MPI_Get_count(&status, MPI_WCHAR, &count);
 
-            std::vector<char> other_symbols(count);
+            std::vector<wchar_t> other_symbols(count);
             MPI_Recv(other_symbols.data(), count, MPI_WCHAR, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
             symbols.insert(symbols.end(), other_symbols.begin(), other_symbols.end());
         }
 
-        std::ofstream file("Library.txt");
+        std::wofstream file("Library.txt");
         if (!file) {
             std::cerr << "Unable to open file for writing\n";
             MPI_Finalize();
             return 1;
         }
 
-        for (char symbol : symbols) {
+        for (wchar_t symbol : symbols) { 
             file << symbol;
         }
         file.close();
-     
-        vector<double> probabilities = compute_probabilities(symbols);
+
+	vector<double> probabilities = compute_probabilities(symbols);
         vector<vector<int>> C(probabilities.size());
         vector<int> len(probabilities.size());
         Huffman(C, len, probabilities);
