@@ -13,6 +13,8 @@ using namespace std;
 
 static const int N = 10000;
 static const std::vector<wchar_t> arr = {L'ж', L'з', L'и', L'к', L'л', L'м', L' ', L'0', L'1', L'2', L'3', L'4', L'5', L'6', L'7', L'8', L'9', L'@', L'.'};
+static char order[19] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
+static char orderNew[19] = { -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1 };
 
 std::vector<wchar_t> CreateFile(int process_id, int world_size) {
     srand(time(NULL) ^ process_id);
