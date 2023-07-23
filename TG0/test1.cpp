@@ -13,20 +13,20 @@
 using namespace std;
 
 static const int N = 10000;
-static char arr[] = { 'a', 'b', 'c', 'd', 'e', 'f', ' ', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '@', '.' };
+static const std::vector<wchar_t> arr = {L'ж', L'з', L'и', L'к', L'л', L'м', L' ', L'0', L'1', L'2', L'3', L'4', L'5', L'6', L'7', L'8', L'9', L'@', L'.'};
 static char order[19] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
 static char orderNew[19] = { -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1 };
 
 std::vector<char> CreateFile(int process_id, int world_size) {
     srand(time(NULL) ^ process_id);
 
-    int i;
     std::vector<int> entry(19, 0);
     std::vector<char> symbols;
 
     int symbols_per_process = N / world_size;
-    if (process_id == world_size - 1) {
-        symbols_per_process += N % world_size;
+    int remainder = N % world_size;
+    if (process_id < remainder) {
+        symbols_per_process++;
     }
 
     for (int i = 0; i < symbols_per_process; ++i) {
@@ -38,6 +38,7 @@ std::vector<char> CreateFile(int process_id, int world_size) {
 
     return symbols;
 }
+
 
 int UP(vector <double>& P, double q) {
 // n-длинна обрабатываемой части массива
@@ -166,7 +167,7 @@ int main(int argc, char** argv) {
             MPI_Get_count(&status, MPI_CHAR, &count);
 
             std::vector<char> other_symbols(count);
-            MPI_Recv(other_symbols.data(), count, MPI_CHAR, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            MPI_Recv(other_symbols.data(), count, MPI_WCHAR, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
             symbols.insert(symbols.end(), other_symbols.begin(), other_symbols.end());
         }
@@ -189,7 +190,7 @@ int main(int argc, char** argv) {
         Huffman(C, len, probabilities);
     }
     else {
-        MPI_Send(symbols.data(), symbols.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD);
+        MPI_Send(symbols.data(), symbols.size(), MPI_WCHAR, 0, 0, MPI_COMM_WORLD);
     }
 
     MPI_Finalize();
