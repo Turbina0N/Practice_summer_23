@@ -21,7 +21,7 @@ std::vector<wchar_t> CreateFile(int process_id, int world_size) {
 
     int i;
     std::vector<int> entry(19, 0);
-    std::vector<char> symbols;
+    std::vector<wchar_t> symbols;
 
     for (i = 0; i < N / world_size; ++i) {
         int index = rand() % 19;
