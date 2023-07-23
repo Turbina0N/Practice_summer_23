@@ -1,6 +1,7 @@
 #include <mpi.h>
 #include <iostream>
 #include <fstream>
+#include <cstdio>
 #include <cstdlib>
 #include <ctime>
 #include <vector>
@@ -12,20 +13,20 @@
 using namespace std;
 
 static const int N = 10000;
-static const std::vector<wchar_t> arr = {L'ж', L'з', L'и', L'к', L'л', L'м', L' ', L'0', L'1', L'2', L'3', L'4', L'5', L'6', L'7', L'8', L'9', L'@', L'.'};
+static char arr[] = { 'a', 'b', 'c', 'd', 'e', 'f', ' ', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '@', '.' };
 static char order[19] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
 static char orderNew[19] = { -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1 };
 
-std::vector<wchar_t> CreateFile(int process_id, int world_size) {
-     srand(time(NULL) ^ process_id);
+std::vector<char> CreateFile(int process_id, int world_size) {
+    srand(time(NULL) ^ process_id);
 
     int i;
     std::vector<int> entry(19, 0);
-    std::vector<wchar_t> symbols;
+    std::vector<char> symbols;
 
     for (i = 0; i < N / world_size; ++i) {
         int index = rand() % 19;
-        wchar_t symbol = arr[index];
+        char symbol = arr[index];
         entry[index]++;
         symbols.push_back(symbol);
     }
@@ -126,10 +127,10 @@ string CodingHuffman(string s_input, string s_output, vector<vector<int>> C) {
 }
 
 // Функция для подсчета вероятностей символов в файле
-vector<double> compute_probabilities(const vector<wchar_t>& symbols) {
-    map<wchar_t, int> counts;
+vector<double> compute_probabilities(const vector<char>& symbols) {
+    map<char, int> counts;
     int total = 0;
-    for (wchar_t c : symbols) {
+    for (char c : symbols) {
         counts[c]++;
         total++;
     }
@@ -141,6 +142,26 @@ vector<double> compute_probabilities(const vector<wchar_t>& symbols) {
     return probabilities;
 }
 
+// Функции для преобразования между таблицей Хаффмана и одномерным массивом
+vector<int> to_1D(const vector<vector<int>>& C) {
+    vector<int> oneD;
+    for (const auto& row : C) {
+        oneD.insert(oneD.end(), row.begin(), row.end());
+    }
+    return oneD;
+}
+//add vector<>
+vector<vector<int>> to_2D(const vector<int>& oneD, int n) {
+    vector<vector<int>> C(n);
+    auto it = oneD.begin();
+    for (auto& row : C) {
+        for (int i = 0; i < n; ++i) {
+            row.push_back(*it++);
+        }
+    }
+    return C;
+}
+
 int main(int argc, char** argv) {
     MPI_Init(&argc, &argv);
 
@@ -150,40 +171,48 @@ int main(int argc, char** argv) {
     int world_size;
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
-    std::vector<wchar_t> symbols = CreateFile(world_rank, world_size);
+    std::vector<char> symbols = CreateFile(world_rank, world_size);
     if (world_rank == 0) {
         for (int i = 1; i < world_size; ++i) {
             int count;
             MPI_Status status;
 
             MPI_Probe(i, 0, MPI_COMM_WORLD, &status);
-            MPI_Get_count(&status, MPI_WCHAR, &count);
+            MPI_Get_count(&status, MPI_CHAR, &count);
 
-            std::vector<wchar_t> other_symbols(count);
-            MPI_Recv(other_symbols.data(), count, MPI_WCHAR, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            std::vector<char> other_symbols(count);
+            MPI_Recv(other_symbols.data(), count, MPI_CHAR, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
             symbols.insert(symbols.end(), other_symbols.begin(), other_symbols.end());
         }
 
-        std::wofstream file("Library.txt");
+        std::ofstream file("Library.txt");
         if (!file) {
             std::cerr << "Unable to open file for writing\n";
             MPI_Finalize();
             return 1;
         }
 
-        for (wchar_t symbol : symbols) { 
+        for (char symbol : symbols) {
             file << symbol;
         }
         file.close();
-
-	vector<double> probabilities = compute_probabilities(symbols);
+     	//?? тот узел
+        vector<double> probabilities = compute_probabilities(symbols);
         vector<vector<int>> C(probabilities.size());
         vector<int> len(probabilities.size());
         Huffman(C, len, probabilities);
+        
+        vector<int> oneD = to_1D(C);
+        MPI_Bcast(oneD.data(), oneD.size(), MPI_INT, 0, MPI_COMM_WORLD);
     }
     else {
-        MPI_Send(symbols.data(), symbols.size(), MPI_WCHAR, 0, 0, MPI_COMM_WORLD);
+        MPI_Send(symbols.data(), symbols.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD);
+        // На других узлах получаем таблицу Хаффмана 
+	// добавить подсчет всех символов в таблице хаффмена
+        vector<int> oneD(n * n); 
+        MPI_Bcast(oneD.data(), oneD.size(), MPI_INT, 0, MPI_COMM_WORLD);
+        vector<vector<int>> C = to_2D(oneD, n);
     }
 
     MPI_Finalize();
