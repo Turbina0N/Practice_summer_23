@@ -24,7 +24,12 @@ std::vector<char> CreateFile(int process_id, int world_size) {
     std::vector<int> entry(19, 0);
     std::vector<char> symbols;
 
-    for (i = 0; i < N / world_size; ++i) {
+    int symbols_per_process = N / world_size;
+    if (process_id == world_size - 1) {
+        symbols_per_process += N % world_size;
+    }
+
+    for (int i = 0; i < symbols_per_process; ++i) {
         int index = rand() % 19;
         char symbol = arr[index];
         entry[index]++;
