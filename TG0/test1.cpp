@@ -17,10 +17,10 @@ static const std::vector<wchar_t> arr = {L'ж', L'з', L'и', L'к', L'л', L'м
 static char order[19] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
 static char orderNew[19] = { -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1 };
 
-std::vector<char> CreateFile(int process_id, int world_size) {
+std::vector<wchar_t> CreateFile(int process_id, int world_size) {
     srand(time(NULL) ^ process_id);
 
-   std::vector<int> entry(19, 0);
+    std::vector<int> entry(19, 0);
     std::vector<wchar_t> symbols;
 
     int symbols_per_process = N / world_size;
