@@ -17,21 +17,15 @@ static char order[19] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-
 static char orderNew[19] = { -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1 };
 
 std::vector<wchar_t> CreateFile(int process_id, int world_size) {
-    srand(time(NULL) ^ process_id);
+     srand(time(NULL) ^ process_id);
 
+    int i;
     std::vector<int> entry(19, 0);
-    std::vector<wchar_t> symbols;
+    std::vector<char> symbols;
 
-    int symbols_per_process = N / world_size;
-    int remainder = N % world_size;
-
-    if (process_id < remainder) {
-        symbols_per_process++;
-    }
-
-    for (int i = 0; i < symbols_per_process; ++i) {
+    for (i = 0; i < N / world_size; ++i) {
         int index = rand() % 19;
-        wchar_t symbol = arr[index];
+        char symbol = arr[index];
         entry[index]++;
         symbols.push_back(symbol);
     }
