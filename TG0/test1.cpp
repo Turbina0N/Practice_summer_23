@@ -34,10 +34,10 @@ std::vector<char> load_alphabet(const std::string& filename) {
 
 std::vector<char> CreateFile(const std::vector<char>& alphabet, int process_id, int world_size) {
     srand(time(NULL) ^ process_id);
-    int symbols_per_process = (N - (N % 2)) / world_size;
-
-    if (process_id == world_size - 1 && N % 2 != 0)
-        symbols_per_process++;
+    
+    int base_symbols_per_process = N / world_size;
+    int remainder = N % world_size;
+    int symbols_per_process = base_symbols_per_process + (process_id < remainder ? 1 : 0);
 
     std::vector<int> entry(alphabet.size(), 0);
     std::vector<char> symbols;
@@ -146,16 +146,30 @@ string CodingHuffman(string s_input, string s_output, vector<vector<int>> C) {
 
 // Функция для подсчета вероятностей символов в файле
 vector<double> compute_probabilities(const vector<char>& symbols) {
+ std::ifstream file("symbols.txt");
+    if (!file) {
+        std::cerr << "Unable to open alphabet file\n";
+        return {};
+    }
+
+    std::vector<char> alphabet;
+    char c;
+    while (file.get(c)) {
+        alphabet.push_back(c);
+    }
     map<char, int> counts;
     int total = 0;
     for (char c : symbols) {
         counts[c]++;
         total++;
     }
-	
     vector<double> probabilities;
-    for (auto& pair : counts) {
-        probabilities.push_back(static_cast<double>(pair.second) / total);
+    for (char c : alphabet) {
+        if(counts.count(c) > 0) {
+            probabilities.push_back(static_cast<double>(counts[c]) / total);
+        } else {
+            probabilities.push_back(0.0);
+        }
     }
     return probabilities;
 }
