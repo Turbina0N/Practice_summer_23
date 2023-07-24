@@ -13,8 +13,8 @@
 using namespace std;
 
 static const int N = 10000;
-static char order[19] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
-static char orderNew[19] = { -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1 };
+static std::vector<char> order[19];
+static std::vector<char> orderNew[19];
 
 std::vector<char> load_alphabet(const std::string& filename) {
     std::ifstream file(filename);
@@ -223,14 +223,16 @@ int main(int argc, char** argv) {
         vector<double> probabilities = compute_probabilities(symbols);
         vector<vector<int>> C(probabilities.size());
         vector<int> len(probabilities.size());
+	vector<double> P = probabilities;
         Huffman(C, len, probabilities);
 	P.clear();
+	
 	for (int i = 0; i < C.size(); i++) {
 		for (int z = 0; z < C.size(); z++) {
 			if (probability[i] == m_P[z]) { // prob - исходный порядо букв в массиве,  m_P - отсортированный
 				if (order[z] == -1) {
-					order[z] = arr[i]; //создаем текущий порядок букв
-					cout << arr[i] << " - ";
+					order[z] = alphabet[i]; //создаем текущий порядок букв
+					cout << alphabet[i] << " - ";
 					for (int j = 0; j < C[z].size(); j++) {
 						cout << C[z][j];
 					}
