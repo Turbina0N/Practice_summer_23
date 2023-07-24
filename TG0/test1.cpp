@@ -124,7 +124,7 @@ string CodingHuffman(string s_input, string s_output, vector<vector<int>> C) {
     string string1; 
     ofstream output(s_output);
     
-    while (getline(input, string)) { 
+    while (getline(input, string1)) { 
         int n = 0;
         while (n != string1.size()) {
             for (int i = 0; i < C.size(); i++) {
