@@ -36,7 +36,7 @@ std::vector<char> CreateFile(const std::vector<char>& alphabet, int process_id, 
     srand(time(NULL) ^ process_id);
     int symbols_per_process = N / world_size;
 
-    if (process_id == world_size - 1 && N % world_size != 0)
+    if (process_id == world_size - 1)
         symbols_per_process += N % world_size;
 
     std::vector<int> entry(alphabet.size(), 0);
