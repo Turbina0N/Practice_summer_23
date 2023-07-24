@@ -6,8 +6,7 @@
 #include <ctime>
 #include <vector>
 #include <string>
-#include <algorithm>
-#include <Windows.h>           
+#include <algorithm>          
 #include <sstream>
 
 using namespace std;//предусмотрение возможности изменять размер массива arr
