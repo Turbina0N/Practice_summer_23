@@ -178,7 +178,7 @@ int main(int argc, char** argv) {
     std::vector<char> symbols = CreateFile(alphabet, world_rank, world_size);
 
     std::cout << "На узле " << world_rank << " сгенерировано " << symbols.size() << " символов.\n";
-
+	MPI_Barrier(MPI_COMM_WORLD);
     if (world_rank == 0) {
         for (int i = 1; i < world_size; ++i) {
             int count;
@@ -208,7 +208,7 @@ int main(int argc, char** argv) {
         file.close();
 
         std::cout << "В файл записано " << symbols.size() << " символов.\n";
-
+ 
         vector<double> probabilities = compute_probabilities(symbols);
         vector<vector<int>> C(probabilities.size());
         vector<int> len(probabilities.size());
