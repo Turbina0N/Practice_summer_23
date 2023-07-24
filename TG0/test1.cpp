@@ -1,4 +1,4 @@
-#include <mpi.h>
+//#include <mpi.h>
 #include <iostream>
 #include <fstream>
 #include <cstdio>
@@ -106,14 +106,14 @@ bool myfunction(double i, double j) { return (i > j); }
 string CodingHuffman(string s_input, string s_output, vector<vector<int>> C) {
     string result;
     ifstream input(s_input);
-    string string; 
+    string string1; 
     ofstream output(s_output);
     
     while (getline(input, string)) { 
         int n = 0;
-        while (n != string.size()) {
+        while (n != string1.size()) {
             for (int i = 0; i < C.size(); i++) {
-                if (string[n] == order[i]) {
+                if (string1[n] == order[i]) {
                     for (int j = 0; j < C[i].size(); j++)
                         result += to_string(C[i][j]);  
                     n++;
