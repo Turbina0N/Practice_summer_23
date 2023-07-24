@@ -219,24 +219,23 @@ int main(int argc, char** argv) {
         file.close();
 
         std::cout << "В файл записано " << symbols.size() << " символов.\n";
- 
-        vector<double> probabilities = compute_probabilities(symbols);
-        vector<vector<int>> C(probabilities.size());
-        vector<int> len(probabilities.size());
-	vector<double> P = probabilities;
+ 	std::vector<double> probabilities = compute_probabilities(symbols);
+        std::vector<vector<int>> C(probabilities.size());
+        std::vector<int> len(probabilities.size());
+	std::vector<double> P = probabilities;
         Huffman(C, len, probabilities);
 	P.clear();
-	
+	double coding_price=0;
 	for (int i = 0; i < C.size(); i++) {
 		for (int z = 0; z < C.size(); z++) {
 			if (probability[i] == m_P[z]) { // prob - исходный порядо букв в массиве,  m_P - отсортированный
 				if (order[z] == -1) {
 					order[z] = alphabet[i]; //создаем текущий порядок букв
-					cout << alphabet[i] << " - ";
+					std::cout << alphabet[i] << " - ";
 					for (int j = 0; j < C[z].size(); j++) {
-						cout << C[z][j];
+						 std::cout << C[z][j];
 					}
-					cout << "\n";
+					 std::cout << "\n";
 
 
 					coding_price += (m_P[z] * len[z]);
@@ -246,8 +245,8 @@ int main(int argc, char** argv) {
 			}
 		}
 	}
-	cout << "\n";
-	cout << "Цена кодирования - " << coding_price << endl;
+	 std::cout << "\n";
+	 std::cout << "Цена кодирования - " << coding_price << endl;
     }
     else {
         MPI_Send(symbols.data(), symbols.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD);
