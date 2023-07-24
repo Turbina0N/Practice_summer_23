@@ -1,4 +1,4 @@
-//#include <mpi.h>
+#include <mpi.h>
 #include <iostream>
 #include <fstream>
 #include <cstdio>
@@ -13,20 +13,35 @@
 using namespace std;
 
 static const int N = 10000;
-static char arr[] = { 'ж', 'з', 'и', 'к', 'л', 'м', ' ', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '@', '.' };
 static char order[19] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
 static char orderNew[19] = { -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1 };
 
-std::vector<char> CreateFile(int process_id, int world_size) {
+std::vector<char> load_alphabet(const std::string& filename) {
+    std::ifstream file(filename);
+    if (!file) {
+        std::cerr << "Unable to open alphabet file\n";
+        return {};
+    }
+
+    std::vector<char> alphabet;
+    char c;
+    while (file.get(c)) {
+        alphabet.push_back(c);
+    }
+
+    return alphabet;
+}
+
+std::vector<char> CreateFile(const std::vector<char>& alphabet, int process_id, int world_size) {
     srand(time(NULL) ^ process_id);
 
     int i;
-    std::vector<int> entry(19, 0);
+    std::vector<int> entry(alphabet.size(), 0);
     std::vector<char> symbols;
 
     for (i = 0; i < N / world_size; ++i) {
-        int index = rand() % 19;
-        char symbol = arr[index];
+        int index = rand() % alphabet.size();
+        char symbol = alphabet[index];
         entry[index]++;
         symbols.push_back(symbol);
     }
@@ -150,7 +165,12 @@ int main(int argc, char** argv) {
     int world_size;
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
-    std::vector<char> symbols = CreateFile(world_rank, world_size);
+    std::vector<char> alphabet = load_alphabet("alp.txt");
+    if (alphabet.empty()) {
+        MPI_Finalize();
+        return 1;
+    }
+    std::vector<char> symbols = CreateFile(alphabet, world_rank, world_size);
     if (world_rank == 0) {
         for (int i = 1; i < world_size; ++i) {
             int count;
