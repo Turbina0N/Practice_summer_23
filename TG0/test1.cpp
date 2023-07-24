@@ -34,10 +34,10 @@ std::vector<char> load_alphabet(const std::string& filename) {
 
 std::vector<char> CreateFile(const std::vector<char>& alphabet, int process_id, int world_size) {
     srand(time(NULL) ^ process_id);
-    int symbols_per_process = N / world_size;
+    int symbols_per_process = (N - (N % 2)) / world_size;
 
-    if (process_id == world_size - 1)
-        symbols_per_process += N % world_size;
+    if (process_id == world_size - 1 && N % 2 != 0)
+        symbols_per_process++;
 
     std::vector<int> entry(alphabet.size(), 0);
     std::vector<char> symbols;
