@@ -144,8 +144,6 @@ vector<double> compute_probabilities(const vector<char>& symbols) {
 
 int main(int argc, char** argv) {
     MPI_Init(&argc, &argv);
-	SetConsoleCP(1251);         
-	SetConsoleOutputCP(1251);
     int world_rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
 
