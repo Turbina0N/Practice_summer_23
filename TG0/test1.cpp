@@ -35,11 +35,9 @@ std::vector<char> load_alphabet(const std::string& filename) {
 std::vector<char> CreateFile(const std::vector<char>& alphabet, int process_id, int world_size) {
     srand(time(NULL) ^ process_id);
     int symbols_per_process = N / world_size;
-    // Если N не делится на world_size без остатка и это последний процесс,
-    // добавить один символ.
-    if (N % world_size != 0 && process_id == world_size - 1) {
-        symbols_per_process++;
-    }
+
+    if (process_id == world_size - 1 && N % world_size != 0)
+        symbols_per_process += N % world_size;
 
     std::vector<int> entry(alphabet.size(), 0);
     std::vector<char> symbols;
@@ -178,7 +176,6 @@ int main(int argc, char** argv) {
     std::vector<char> symbols = CreateFile(alphabet, world_rank, world_size);
 
     std::cout << "На узле " << world_rank << " сгенерировано " << symbols.size() << " символов.\n";
-	MPI_Barrier(MPI_COMM_WORLD);
     if (world_rank == 0) {
         for (int i = 1; i < world_size; ++i) {
             int count;
