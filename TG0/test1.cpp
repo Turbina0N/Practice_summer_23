@@ -165,7 +165,7 @@ int main(int argc, char** argv) {
     int world_size;
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
-    std::vector<char> alphabet = load_alphabet("alp.txt");
+    std::vector<char> alphabet = load_alphabet("symbols.txt");
     if (alphabet.empty()) {
         MPI_Finalize();
         return 1;
