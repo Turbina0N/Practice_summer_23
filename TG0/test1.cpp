@@ -171,6 +171,9 @@ int main(int argc, char** argv) {
         return 1;
     }
     std::vector<char> symbols = CreateFile(alphabet, world_rank, world_size);
+
+    std::cout << "На узле " << world_rank << " сгенерировано " << symbols.size() << " символов.\n";
+
     if (world_rank == 0) {
         for (int i = 1; i < world_size; ++i) {
             int count;
@@ -185,6 +188,8 @@ int main(int argc, char** argv) {
             symbols.insert(symbols.end(), other_symbols.begin(), other_symbols.end());
         }
 
+        std::cout << "Узел с rank 0 получил " << symbols.size() << " символов.\n";
+
         std::ofstream file("Library.txt");
         if (!file) {
             std::cerr << "Unable to open file for writing\n";
@@ -196,7 +201,9 @@ int main(int argc, char** argv) {
             file << symbol;
         }
         file.close();
-     	//?? тот узел
+
+        std::cout << "В файл записано " << symbols.size() << " символов.\n";
+
         vector<double> probabilities = compute_probabilities(symbols);
         vector<vector<int>> C(probabilities.size());
         vector<int> len(probabilities.size());
@@ -209,3 +216,4 @@ int main(int argc, char** argv) {
     MPI_Finalize();
     return 0;
 }
+
