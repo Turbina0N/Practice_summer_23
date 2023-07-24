@@ -224,6 +224,28 @@ int main(int argc, char** argv) {
         vector<vector<int>> C(probabilities.size());
         vector<int> len(probabilities.size());
         Huffman(C, len, probabilities);
+	P.clear();
+	for (int i = 0; i < C.size(); i++) {
+		for (int z = 0; z < C.size(); z++) {
+			if (probability[i] == m_P[z]) { // prob - исходный порядо букв в массиве,  m_P - отсортированный
+				if (order[z] == -1) {
+					order[z] = arr[i]; //создаем текущий порядок букв
+					cout << arr[i] << " - ";
+					for (int j = 0; j < C[z].size(); j++) {
+						cout << C[z][j];
+					}
+					cout << "\n";
+
+
+					coding_price += (m_P[z] * len[z]);
+					P.push_back(m_P[z]);
+					break;
+				}
+			}
+		}
+	}
+	cout << "\n";
+	cout << "Цена кодирования - " << coding_price << endl;
     }
     else {
         MPI_Send(symbols.data(), symbols.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD);
