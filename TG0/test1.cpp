@@ -34,12 +34,17 @@ std::vector<char> load_alphabet(const std::string& filename) {
 
 std::vector<char> CreateFile(const std::vector<char>& alphabet, int process_id, int world_size) {
     srand(time(NULL) ^ process_id);
+    int symbols_per_process = N / world_size;
+    // Если N не делится на world_size без остатка и это последний процесс,
+    // добавить один символ.
+    if (N % world_size != 0 && process_id == world_size - 1) {
+        symbols_per_process++;
+    }
 
-    int i;
     std::vector<int> entry(alphabet.size(), 0);
     std::vector<char> symbols;
 
-    for (i = 0; i < N / world_size; ++i) {
+    for (int i = 0; i < symbols_per_process; ++i) {
         int index = rand() % alphabet.size();
         char symbol = alphabet[index];
         entry[index]++;
