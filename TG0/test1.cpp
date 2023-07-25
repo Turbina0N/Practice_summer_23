@@ -16,21 +16,21 @@ static const int N = 10000;
 static std::vector<char> order(19,-1);
 static std::vector<char> orderNew(19,-1);
 
-std::vector<char> load_alphabet(const std::string& filename) {
-    std::ifstream file(filename);
-    if (!file) {
-        std::cerr << "Unable to open alphabet file\n";
-        return {};
-    }
-    std::vector<char> alphabet;
-    char c;
-    while (file.get(c)) {
-        alphabet.push_back(c);
-    }
-std::cout << alphabet.size(); 
-for (auto c : alphabet) std::cout<<c<<" ";
-    return alphabet;
-}
+// std::vector<char> load_alphabet(const std::string& filename) {
+//     std::ifstream file(filename);
+//     if (!file) {
+//         std::cerr << "Unable to open alphabet file\n";
+//         return {};
+//     }
+//     std::vector<char> alphabet;
+//     char c;
+//     while (file.get(c)) {
+//         alphabet.push_back(c);
+//     }
+// std::cout << alphabet.size(); 
+// for (auto c : alphabet) std::cout<<c<<" ";
+//     return alphabet;
+// }
 
 std::vector<char> CreateFile(const std::vector<char>& alphabet, int process_id, int world_size) {
     srand(time(NULL) ^ process_id);
@@ -123,7 +123,6 @@ bool myfunction(double i, double j) { return (i > j); }
 
 // Функция для подсчета вероятностей символов в файле
 vector<double> compute_probabilities(const vector<char>& symbols,const vector<char>& alphabet) {
-    std::cout << alphabet.size();
     map<char, int> counts;
     int total = 0;
     for (char c : symbols) {
@@ -141,57 +140,57 @@ vector<double> compute_probabilities(const vector<char>& symbols,const vector<ch
     return probabilities;
 }
 
-// std::vector<std::vector<int>> transform_to_rectangle(const std::vector<std::vector<int>>& C) {
-//     std::vector<std::vector<int>> C_rectangular(C.size(), std::vector<int>(5, -1));
-//     for (size_t i = 0; i < C.size(); ++i) {
-//         copy(C[i].begin(), C[i].end(), C_rectangular[i].begin());
-//     }
-//     return C_rectangular;
-// }
-// // Вспомогательная функция для чтения файла в строку
-// std::string readFile(const std::string& filename) {
-//     std::ifstream file(filename);
-//     std::stringstream buffer;
-//     buffer << file.rdbuf();
-//     return buffer.str();
-// }
+std::vector<std::vector<int>> transform_to_rectangle(const std::vector<std::vector<int>>& C) {
+    std::vector<std::vector<int>> C_rectangular(C.size(), std::vector<int>(5, -1));
+    for (size_t i = 0; i < C.size(); ++i) {
+        copy(C[i].begin(), C[i].end(), C_rectangular[i].begin());
+    }
+    return C_rectangular;
+}
+// Вспомогательная функция для чтения файла в строку
+std::string readFile(const std::string& filename) {
+    std::ifstream file(filename);
+    std::stringstream buffer;
+    buffer << file.rdbuf();
+    return buffer.str();
+}
 
-// std::string CodingHuffman(const std::string& s_input, const std::string& s_output, const std::vector<std::vector<int>>& C) {
-//     int rank, world_size;
-//     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-//     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+std::string CodingHuffman(const std::string& s_input, const std::string& s_output, const std::vector<std::vector<int>>& C) {
+    int rank, world_size;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
-//     // Все процессы сначала читают весь файл
-//     std::string file_content = readFile(s_input);
-//     int total_symbols = file_content.size();
+    // Все процессы сначала читают весь файл
+    std::string file_content = readFile(s_input);
+    int total_symbols = file_content.size();
 
-//     int base_symbols_per_process = total_symbols / world_size;
-//     int remainder = total_symbols % world_size;
+    int base_symbols_per_process = total_symbols / world_size;
+    int remainder = total_symbols % world_size;
 
-//     // Определение начала и конца обработки каждого процесса
-//     int start_symbol = rank * base_symbols_per_process + std::min(rank, remainder);
-//     int symbols_per_process = base_symbols_per_process + (rank < remainder ? 1 : 0);
-//     int end_symbol = start_symbol + symbols_per_process;
+    // Определение начала и конца обработки каждого процесса
+    int start_symbol = rank * base_symbols_per_process + std::min(rank, remainder);
+    int symbols_per_process = base_symbols_per_process + (rank < remainder ? 1 : 0);
+    int end_symbol = start_symbol + symbols_per_process;
 
-//     std::string result;
-//     for (int n = start_symbol; n < end_symbol; ++n) {
-//         for (int i = 0; i < C.size(); ++i) {
-//             if (file_content[n] == order[i]) {
-//                 for (int j = 0; j < C[i].size(); ++j) {
-//                     if (C[i][j] != -1) {
-//                         result += std::to_string(C[i][j]);
-//                     }
-//                 }
-//             }
-//         }
-//     }
+    std::string result;
+    for (int n = start_symbol; n < end_symbol; ++n) {
+        for (int i = 0; i < C.size(); ++i) {
+            if (file_content[n] == order[i]) {
+                for (int j = 0; j < C[i].size(); ++j) {
+                    if (C[i][j] != -1) {
+                        result += std::to_string(C[i][j]);
+                    }
+                }
+            }
+        }
+    }
 
-//     // Запись результата в файл
-//     std::ofstream output(s_output + "_part_" + std::to_string(rank)); // каждый процесс создает свой файл
-//     output << result;
+    // Запись результата в файл
+    std::ofstream output(s_output + "_part_" + std::to_string(rank)); // каждый процесс создает свой файл
+    output << result;
 
-//     return result;
-// }
+    return result;
+}
 
 int main(int argc, char** argv) {
     MPI_Init(&argc, &argv);
@@ -248,15 +247,7 @@ int main(int argc, char** argv) {
 	std::vector<double> m_P = P;
         Huffman(C, len, P);
 	P.clear();
-	double coding_price=0;
-	for (const auto& row : C) {
-        for (int val : row) {
-            std::cout << val << ' ';
-        }
-        std::cout << '\n';
-    	}
-    	std::cout << std::endl;
-	    
+	double coding_price=0;    
 	for (int i = 0; i < C.size(); i++) {
 		for (int z = 0; z < C.size(); z++) {
 			if (probabilities[i] == m_P[z]) { // prob - исходный порядо букв в массиве,  m_P - отсортированный
@@ -278,53 +269,52 @@ int main(int argc, char** argv) {
 	}
 	 std::cout << "\n";
 	 std::cout << "Цена кодирования - " << coding_price << endl;
-	 std::cout << C.size();
-	// std::vector<vector<int>> C_rectangular = transform_to_rectangle(C);
-	// int numRows = C_rectangular.size();
- //        int numCols = C_rectangular[0].size();
+	std::vector<vector<int>> C_rectangular = transform_to_rectangle(C);
+	int numRows = C_rectangular.size();
+        int numCols = C_rectangular[0].size();
 
- //        // Посылаем таблицу Хаффмана обратно всем узлам
- //        for (int i = 1; i < world_size; ++i) {
- //            MPI_Send(&numRows, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
- //            MPI_Send(&numCols, 1, MPI_INT, i, 1, MPI_COMM_WORLD);
- //            for (const auto& row : C_rectangular) {
- //                MPI_Send(row.data(), row.size(), MPI_INT, i, 2, MPI_COMM_WORLD);
- //            }
- //            MPI_Send(len.data(), len.size(), MPI_INT, i, 3, MPI_COMM_WORLD);
- //        }
+        // Посылаем таблицу Хаффмана обратно всем узлам
+        for (int i = 1; i < world_size; ++i) {
+            MPI_Send(&numRows, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
+            MPI_Send(&numCols, 1, MPI_INT, i, 1, MPI_COMM_WORLD);
+            for (const auto& row : C_rectangular) {
+                MPI_Send(row.data(), row.size(), MPI_INT, i, 2, MPI_COMM_WORLD);
+            }
+            MPI_Send(len.data(), len.size(), MPI_INT, i, 3, MPI_COMM_WORLD);
+        }
 
-	//     CodingHuffman("Library.txt", "Coding", C_rectangular);
+	    CodingHuffman("Library.txt", "Coding", C_rectangular);
     }
     else {
         MPI_Send(symbols.data(), symbols.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD);
     }
 	
    if (world_rank != 0) {
- //        int numRows, numCols;
- //        MPI_Recv(&numRows, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
- //        MPI_Recv(&numCols, 1, MPI_INT, 0, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        int numRows, numCols;
+        MPI_Recv(&numRows, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        MPI_Recv(&numCols, 1, MPI_INT, 0, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
- //        std::vector<std::vector<int>> C_received(numRows, std::vector<int>(numCols));
- //        for (auto& row : C_received) {
- //            MPI_Recv(row.data(), numCols, MPI_INT, 0, 2, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
- //        }
+        std::vector<std::vector<int>> C_received(numRows, std::vector<int>(numCols));
+        for (auto& row : C_received) {
+            MPI_Recv(row.data(), numCols, MPI_INT, 0, 2, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        }
 
- //        int len_size;
- //        MPI_Recv(&len_size, 1, MPI_INT, 0, 3, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        int len_size;
+        MPI_Recv(&len_size, 1, MPI_INT, 0, 3, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
- //        std::vector<int> len_received(len_size);
- //        MPI_Recv(len_received.data(), len_received.size(), MPI_INT, 0, 4, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        std::vector<int> len_received(len_size);
+        MPI_Recv(len_received.data(), len_received.size(), MPI_INT, 0, 4, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 	   
-	// std::cout << "На узле " << world_rank << ", массив C_received:\n";
- //    for (const auto& row : C_received) {
- //        for (int val : row) {
- //            std::cout << val << ' ';
- //        }
- //        std::cout << '\n';
- //    }
- //    std::cout << std::endl;
+	std::cout << "На узле " << world_rank << ", массив C_received:\n";
+    for (const auto& row : C_received) {
+        for (int val : row) {
+            std::cout << val << ' ';
+        }
+        std::cout << '\n';
+    }
+    std::cout << std::endl;
 
-	// CodingHuffman("Library.txt", "Coding", C_received);
+	CodingHuffman("Library.txt", "Coding", C_received);
     }
 
     MPI_Finalize();
