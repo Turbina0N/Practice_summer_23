@@ -158,12 +158,19 @@ std::vector<std::vector<int>> transform_to_rectangle(const std::vector<std::vect
             max_len = vec.size();
         }
     }
-
+    std::cout << max_len << " " << C.size();
+	for (const auto& row : C) {
+        for (int val : row) {
+            std::cout << val << ' ';
+        }
+        std::cout << '\n';
+    }
+    std::cout << std::endl;
     std::vector<std::vector<int>> C_rectangular(C.size(), std::vector<int>(max_len, -1));
     for (size_t i = 0; i < C.size(); ++i) {
         copy(C[i].begin(), C[i].end(), C_rectangular[i].begin());
     }
-	
+		
     for (const auto& row : C_rectangular) {
         for (int val : row) {
             std::cout << val << ' ';
