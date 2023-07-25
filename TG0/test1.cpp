@@ -13,8 +13,8 @@
 using namespace std;
 
 static const int N = 10000;
-static std::vector<char> order(19,-1);
-static std::vector<char> orderNew(19,-1);
+static std::vector<char> order(20,-1);
+static std::vector<char> orderNew(20,-1);
 
 std::vector<char> load_alphabet(const std::string& filename) {
     std::ifstream file(filename);
