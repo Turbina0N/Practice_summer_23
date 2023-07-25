@@ -152,33 +152,10 @@ vector<double> compute_probabilities(const vector<char>& symbols) {
 }
 
 std::vector<std::vector<int>> transform_to_rectangle(const std::vector<std::vector<int>>& C) {
-    size_t max_len = 0;
-    for (const auto& vec : C) {
-        if (vec.size() > max_len) {
-            max_len = vec.size();
-        }
-    }
-    std::cout << max_len << " " << C.size();
-	for (const auto& row : C) {
-        for (int val : row) {
-            std::cout << val << ' ';
-        }
-        std::cout << '\n';
-    }
-    std::cout << std::endl;
-    std::vector<std::vector<int>> C_rectangular(C.size(), std::vector<int>(max_len, -1));
+    std::vector<std::vector<int>> C_rectangular(C.size(), std::vector<int>(5, -1));
     for (size_t i = 0; i < C.size(); ++i) {
         copy(C[i].begin(), C[i].end(), C_rectangular[i].begin());
     }
-		
-    for (const auto& row : C_rectangular) {
-        for (int val : row) {
-            std::cout << val << ' ';
-        }
-        std::cout << '\n';
-    }
-    std::cout << std::endl;
-	
     return C_rectangular;
 }
 // Вспомогательная функция для чтения файла в строку
@@ -208,7 +185,7 @@ std::string CodingHuffman(const std::string& s_input, const std::string& s_outpu
 
     std::string result;
     for (int n = start_symbol; n < end_symbol; ++n) {
-        for (int i = 0; i < C.size(); ++i) {
+        for (int i = 0; i < 19; ++i) {
             if (file_content[n] == order[i]) {
                 for (int j = 0; j < C[i].size(); ++j) {
                     if (C[i][j] != -1) {
@@ -273,7 +250,6 @@ int main(int argc, char** argv) {
         std::cout << "В файл записано " << symbols.size() << " символов.\n";
 	    
  	std::vector<double> probabilities = compute_probabilities(symbols);
-	std::cout << probabilities.size();    
         std::vector<vector<int>> C(probabilities.size());
         std::vector<int> len(probabilities.size());
 	std::vector<double> P = probabilities;
@@ -303,18 +279,9 @@ int main(int argc, char** argv) {
 	}
 	 std::cout << "\n";
 	 std::cout << "Цена кодирования - " << coding_price << endl;
-
-	std::cout << C.size();
-	for (const auto& row : C) {
-        for (int val : row) {
-            std::cout << val << ' ';
-        }
-        std::cout << '\n';
-    }
-    std::cout << std::endl;
 	
 	 std::vector<vector<int>> C_rectangular = transform_to_rectangle(C);
-	int numRows = C_rectangular.size();
+	int numRows = 19;
         int numCols = C_rectangular[0].size();
 
         // Посылаем таблицу Хаффмана обратно всем узлам
