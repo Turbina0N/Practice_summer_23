@@ -268,26 +268,38 @@ int main(int argc, char** argv) {
 	 std::cout << "Цена кодирования - " << coding_price << endl;
 
 	 std::vector<vector<int>> C_rectangular = transform_to_rectangle(C);
+	int numRows = C_rectangular.size();
+        int numCols = C_rectangular[0].size();
 
-    // Посылаем таблицу Хаффмана обратно всем узлам
-    for (int i = 1; i < world_size; ++i) {
-        for (const auto& row : C_rectangular) {
-            MPI_Send(row.data(), row.size(), MPI_INT, i, 0, MPI_COMM_WORLD);
+        // Посылаем таблицу Хаффмана обратно всем узлам
+        for (int i = 1; i < world_size; ++i) {
+            MPI_Send(&numRows, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
+            MPI_Send(&numCols, 1, MPI_INT, i, 1, MPI_COMM_WORLD);
+            for (const auto& row : C_rectangular) {
+                MPI_Send(row.data(), row.size(), MPI_INT, i, 2, MPI_COMM_WORLD);
+            }
+            MPI_Send(len.data(), len.size(), MPI_INT, i, 3, MPI_COMM_WORLD);
         }
-        MPI_Send(len.data(), len.size(), MPI_INT, i, 0, MPI_COMM_WORLD);
-    }
-	    
     }
     else {
         MPI_Send(symbols.data(), symbols.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD);
-	// Получаем таблицу Хаффмана от узла 0
-    std::vector<std::vector<int>> C_received(C.size(), vector<int>(C[0].size()));
-    for (auto& row : C_received) {
-        MPI_Recv(row.data(), row.size(), MPI_INT, 0, MPI_ANY_SOURCE, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     }
+	
+    if (world_rank != 0) {
+        int numRows, numCols;
+        MPI_Recv(&numRows, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        MPI_Recv(&numCols, 1, MPI_INT, 0, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-    vector<int> len_received(len.size());
-    MPI_Recv(len_received.data(), len_received.size(), MPI_INT, 0, MPI_ANY_SOURCE, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        std::vector<std::vector<int>> C_received(numRows, std::vector<int>(numCols));
+        for (auto& row : C_received) {
+            MPI_Recv(row.data(), numCols, MPI_INT, 0, 2, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        }
+
+        int len_size;
+        MPI_Recv(&len_size, 1, MPI_INT, 0, 3, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+        std::vector<int> len_received(len_size);
+        MPI_Recv(len_received.data(), len_received.size(), MPI_INT, 0, 4, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     }
 
     MPI_Finalize();
