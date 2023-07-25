@@ -163,7 +163,15 @@ std::vector<std::vector<int>> transform_to_rectangle(const std::vector<std::vect
     for (size_t i = 0; i < C.size(); ++i) {
         copy(C[i].begin(), C[i].end(), C_rectangular[i].begin());
     }
-    
+	
+    for (const auto& row : C_rectangular) {
+        for (int val : row) {
+            std::cout << val << ' ';
+        }
+        std::cout << '\n';
+    }
+    std::cout << std::endl;
+	
     return C_rectangular;
 }
 // Вспомогательная функция для чтения файла в строку
