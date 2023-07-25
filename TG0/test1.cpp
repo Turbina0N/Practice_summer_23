@@ -142,7 +142,7 @@ vector<double> compute_probabilities(const vector<char>& symbols,const vector<ch
 std::vector<std::vector<int>> transform_to_rectangle(const std::vector<std::vector<int>>& C) {
 	int max_l=0;  
 	for (size_t i = 0; i < C.size(); ++i) {
-        if (C[i].size() > max_l) max_l = C[i].size()
+        if (C[i].size() > max_l) max_l = C[i].size();
     }
     std::vector<std::vector<int>> C_rectangular(C.size(), std::vector<int>(max_l, -1));
     for (size_t i = 0; i < C.size(); ++i) {
