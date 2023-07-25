@@ -29,7 +29,7 @@ std::vector<char> load_alphabet(const std::string& filename) {
         alphabet.push_back(c);
     }
 std::cout << alphabet.size(); 
-fot (auto c : alphabet) std::cout<<c<<" ";
+for (auto c : alphabet) std::cout<<c<<" ";
     return alphabet;
 }
 
