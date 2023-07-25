@@ -174,6 +174,22 @@ vector<double> compute_probabilities(const vector<char>& symbols) {
     return probabilities;
 }
 
+vector<vector<int>> transform_to_rectangle(const vector<vector<int>>& C) {
+    size_t max_len = 0;
+    for (const auto& vec : C) {
+        if (vec.size() > max_len) {
+            max_len = vec.size();
+        }
+    }
+
+    vector<vector<int>> C_rectangular(C.size(), vector<int>(max_len, -1));
+    for (size_t i = 0; i < C.size(); ++i) {
+        copy(C[i].begin(), C[i].end(), C_rectangular[i].begin());
+    }
+    
+    return C_rectangular;
+}
+
 int main(int argc, char** argv) {
     MPI_Init(&argc, &argv);
     int world_rank;
@@ -250,9 +266,28 @@ int main(int argc, char** argv) {
 	}
 	 std::cout << "\n";
 	 std::cout << "Цена кодирования - " << coding_price << endl;
+
+	vector<vector<int>> C_rectangular = transform_to_rectangle(C);
+
+    // Посылаем таблицу Хаффмана обратно всем узлам
+    for (int i = 1; i < world_size; ++i) {
+        for (const auto& row : C_rectangular) {
+            MPI_Send(row.data(), row.size(), MPI_INT, i, 0, MPI_COMM_WORLD);
+        }
+        MPI_Send(len.data(), len.size(), MPI_INT, i, 0, MPI_COMM_WORLD);
+    }
+	    
     }
     else {
         MPI_Send(symbols.data(), symbols.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD);
+	// Получаем таблицу Хаффмана от узла 0
+    vector<vector<int>> C_received(C.size(), vector<int>(C[0].size()));
+    for (auto& row : C_received) {
+        MPI_Recv(row.data(), row.size(), MPI_INT, 0, MPI_ANY_SOURCE, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    }
+
+    vector<int> len_received(len.size());
+    MPI_Recv(len_received.data(), len_received.size(), MPI_INT, 0, MPI_ANY_SOURCE, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     }
 
     MPI_Finalize();
