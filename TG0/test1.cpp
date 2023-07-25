@@ -213,7 +213,7 @@ int main(int argc, char** argv) {
     int world_size;
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
-    std::vector<char> alphabet = load_alphabet("symbols.txt");
+    std::vector<char> alphabet = { 'q', 'w', 'e', 'r', 't', 'y', ' ', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '@', '.' };
     if (alphabet.empty()) {
         MPI_Finalize();
         return 1;
