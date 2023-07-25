@@ -189,6 +189,50 @@ std::vector<std::vector<int>> transform_to_rectangle(const std::vector<std::vect
     
     return C_rectangular;
 }
+// Вспомогательная функция для чтения файла в строку
+std::string readFile(const std::string& filename) {
+    std::ifstream file(filename);
+    std::stringstream buffer;
+    buffer << file.rdbuf();
+    return buffer.str();
+}
+
+std::string CodingHuffman(const std::string& s_input, const std::string& s_output, const std::vector<std::vector<int>>& C) {
+    int rank, world_size;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+
+    // Все процессы сначала читают весь файл
+    std::string file_content = readFile(s_input);
+    int total_symbols = file_content.size();
+
+    int base_symbols_per_process = total_symbols / world_size;
+    int remainder = total_symbols % world_size;
+
+    // Определение начала и конца обработки каждого процесса
+    int start_symbol = rank * base_symbols_per_process + std::min(rank, remainder);
+    int symbols_per_process = base_symbols_per_process + (rank < remainder ? 1 : 0);
+    int end_symbol = start_symbol + symbols_per_process;
+
+    std::string result;
+    for (int n = start_symbol; n < end_symbol; ++n) {
+        for (int i = 0; i < C.size(); ++i) {
+            if (file_content[n] == order[i]) {
+                for (int j = 0; j < C[i].size(); ++j) {
+                    if (C[i][j] != -1) {
+                        result += std::to_string(C[i][j]);
+                    }
+                }
+            }
+        }
+    }
+
+    // Запись результата в файл
+    std::ofstream output(s_output + "_part_" + std::to_string(rank)); // каждый процесс создает свой файл
+    output << result;
+
+    return result;
+}
 
 int main(int argc, char** argv) {
     MPI_Init(&argc, &argv);
@@ -280,12 +324,15 @@ int main(int argc, char** argv) {
             }
             MPI_Send(len.data(), len.size(), MPI_INT, i, 3, MPI_COMM_WORLD);
         }
+	
     }
     else {
         MPI_Send(symbols.data(), symbols.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD);
     }
-	
-    if (world_rank != 0) {
+    if (world_rank == 0){
+	    CodingHuffman("input.txt", "output.txt", C);
+    } 
+    else if (world_rank != 0) {
         int numRows, numCols;
         MPI_Recv(&numRows, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         MPI_Recv(&numCols, 1, MPI_INT, 0, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
@@ -300,6 +347,7 @@ int main(int argc, char** argv) {
 
         std::vector<int> len_received(len_size);
         MPI_Recv(len_received.data(), len_received.size(), MPI_INT, 0, 4, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+	CodingHuffman("input.txt", "output.txt", C);
     }
 
     MPI_Finalize();
