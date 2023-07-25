@@ -273,6 +273,7 @@ int main(int argc, char** argv) {
         std::cout << "В файл записано " << symbols.size() << " символов.\n";
 	    
  	std::vector<double> probabilities = compute_probabilities(symbols);
+	std::cout << probabilities.size();    
         std::vector<vector<int>> C(probabilities.size());
         std::vector<int> len(probabilities.size());
 	std::vector<double> P = probabilities;
@@ -301,9 +302,9 @@ int main(int argc, char** argv) {
 		}
 	}
 	 std::cout << "\n";
-	 std::cout << "Цена кодирования - " << coding_price  << " " << C.size << " " << probabilities.size() << endl;
+	 std::cout << "Цена кодирования - " << coding_price << endl;
 
-	
+	std::cout << C.size;
 	for (const auto& row : C) {
         for (int val : row) {
             std::cout << val << ' ';
