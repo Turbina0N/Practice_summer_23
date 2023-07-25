@@ -301,6 +301,15 @@ int main(int argc, char** argv) {
             }
             MPI_Send(len.data(), len.size(), MPI_INT, i, 3, MPI_COMM_WORLD);
         }
+	    std::cout << "На узле " << world_rank << ", массив C_rectangular:\n";
+    for (const auto& row : C_rectangular) {
+        for (int val : row) {
+            std::cout << val << ' ';
+        }
+        std::cout << '\n';
+    }
+    std::cout << std::endl;
+
 	    CodingHuffman("Library.txt", "Coding", C_rectangular);
     }
     else {
@@ -321,6 +330,16 @@ int main(int argc, char** argv) {
 
         std::vector<int> len_received(len_size);
         MPI_Recv(len_received.data(), len_received.size(), MPI_INT, 0, 4, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+	   
+	std::cout << "На узле " << world_rank << ", массив C_received:\n";
+    for (const auto& row : C_received) {
+        for (int val : row) {
+            std::cout << val << ' ';
+        }
+        std::cout << '\n';
+    }
+    std::cout << std::endl;
+
 	CodingHuffman("Library.txt", "Coding", C_received);
     }
 
