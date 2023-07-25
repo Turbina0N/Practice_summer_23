@@ -324,15 +324,12 @@ int main(int argc, char** argv) {
             }
             MPI_Send(len.data(), len.size(), MPI_INT, i, 3, MPI_COMM_WORLD);
         }
-	
+	CodingHuffman("input.txt", "output.txt", C_rectangular);
     }
     else {
         MPI_Send(symbols.data(), symbols.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD);
     }
-    if (world_rank == 0){
-	    CodingHuffman("input.txt", "output.txt", C);
-    } 
-    else if (world_rank != 0) {
+   if (world_rank != 0) {
         int numRows, numCols;
         MPI_Recv(&numRows, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         MPI_Recv(&numCols, 1, MPI_INT, 0, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
@@ -347,7 +344,7 @@ int main(int argc, char** argv) {
 
         std::vector<int> len_received(len_size);
         MPI_Recv(len_received.data(), len_received.size(), MPI_INT, 0, 4, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-	CodingHuffman("input.txt", "output.txt", C);
+	CodingHuffman("input.txt", "output.txt", C_received);
     }
 
     MPI_Finalize();
