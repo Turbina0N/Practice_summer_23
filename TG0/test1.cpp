@@ -130,6 +130,7 @@ vector<double> compute_probabilities(const vector<char>& symbols) {
     }
 
     std::vector<char> alphabet;
+    std::cout << alphabet.size();
     char c;
     while (file.get(c)) {
         alphabet.push_back(c);
