@@ -258,6 +258,14 @@ int main(int argc, char** argv) {
         Huffman(C, len, P);
 	P.clear();
 	double coding_price=0;
+	for (const auto& row : C) {
+        for (int val : row) {
+            std::cout << val << ' ';
+        }
+        std::cout << '\n';
+    	}
+    	std::cout << std::endl;
+	    
 	for (int i = 0; i < C.size(); i++) {
 		for (int z = 0; z < C.size(); z++) {
 			if (probabilities[i] == m_P[z]) { // prob - исходный порядо букв в массиве,  m_P - отсортированный
@@ -293,14 +301,6 @@ int main(int argc, char** argv) {
  //            }
  //            MPI_Send(len.data(), len.size(), MPI_INT, i, 3, MPI_COMM_WORLD);
  //        }
-	//     std::cout << "На узле " << world_rank << ", массив C_rectangular:\n";
- //    for (const auto& row : C_rectangular) {
- //        for (int val : row) {
- //            std::cout << val << ' ';
- //        }
- //        std::cout << '\n';
- //    }
- //    std::cout << std::endl;
 
 	//     CodingHuffman("Library.txt", "Coding", C_rectangular);
     }
