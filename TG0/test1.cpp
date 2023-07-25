@@ -167,17 +167,17 @@ std::string CodingHuffman(const std::string& s_input, const std::string& s_outpu
     std::string file_content = readFile(s_input);
     int total_symbols = file_content.size();
 
-    int base_symbols_per_process = total_symbols / world_size;
+    int base_process = total_symbols / world_size;
     int remainder = total_symbols % world_size;
 
     // Определение начала и конца обработки каждого процесса
-    int start_symbol = rank * base_symbols_per_process + std::min(rank, remainder);
-    int symbols_per_process = base_symbols_per_process + (rank < remainder ? 1 : 0);
+    int start_symbol = rank * base_process + std::min(rank, remainder);
+    int symbols_per_process = base_process + (rank < remainder ? 1 : 0);
     int end_symbol = start_symbol + symbols_per_process;
 
     std::string result;
     for (int n = start_symbol; n < end_symbol; ++n) {
-        for (int i = 0; i < 19; ++i) {
+        for (int i = 0; i < C.size(); ++i) {
             if (file_content[n] == order[i]) {
                 for (int j = 0; j < C[i].size(); ++j) {
                     if (C[i][j] != -1) {
