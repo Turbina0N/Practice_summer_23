@@ -282,12 +282,14 @@ int main(int argc, char** argv) {
     	}	
     	std::cout << std::endl;
 
-	 for (int i = 1; i < world_size; ++i) {
-        MPI_Send(numRows, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
+	for (int i = 1; i < world_size; ++i) {
+        MPI_Send(&numRows, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
         for (int j = 0; j < numRows; ++j) {
             MPI_Send(C_rectangular[j].data(), numCols, MPI_INT, i, 0, MPI_COMM_WORLD);
         }
         MPI_Send(order.data(), order.size(), MPI_CHAR, i, 0, MPI_COMM_WORLD);
+
+    }
 
     }
     else {
@@ -295,13 +297,14 @@ int main(int argc, char** argv) {
     }
 	
    if (world_rank != 0) {
-	   // Принимаем информацию о таблице Хаффмана от процесса с rank = 0
+	// Принимаем информацию о таблице Хаффмана от процесса с rank = 0
     MPI_Recv(&numRows, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     C_rectangular.resize(numRows, std::vector<int>(numCols));
     for (int i = 0; i < numRows; ++i) {
         MPI_Recv(C_rectangular[i].data(), numCols, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     }
     MPI_Recv(order.data(), order.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
 
     }
     MPI_Finalize();
