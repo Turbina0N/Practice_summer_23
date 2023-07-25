@@ -282,50 +282,28 @@ int main(int argc, char** argv) {
     	}	
     	std::cout << std::endl;
 
-     //    // Посылаем таблицу Хаффмана обратно всем узлам
-     //    for (int i = 1; i < world_size; ++i) {
-     //        MPI_Send(&numRows, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
-     //        MPI_Send(&numCols, 1, MPI_INT, i, 1, MPI_COMM_WORLD);
-     //        for (const auto& row : C_rectangular) {
-     //            MPI_Send(row.data(), row.size(), MPI_INT, i, 2, MPI_COMM_WORLD);
-     //        }
-     //        MPI_Send(len.data(), len.size(), MPI_INT, i, 3, MPI_COMM_WORLD);
-     //    }
+	 for (int i = 1; i < world_size; ++i) {
+        MPI_Send(numRows, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
+        for (int j = 0; j < numRows; ++j) {
+            MPI_Send(C_rectangular[j].data(), numCols, MPI_INT, i, 0, MPI_COMM_WORLD);
+        }
+        MPI_Send(order.data(), order.size(), MPI_CHAR, i, 0, MPI_COMM_WORLD);
 
-	    // CodingHuffman("Library.txt", "Coding", C_rectangular);
     }
     else {
         MPI_Send(symbols.data(), symbols.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD);
     }
 	
    if (world_rank != 0) {
- //        int numRows, numCols;
- //        MPI_Recv(&numRows, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
- //        MPI_Recv(&numCols, 1, MPI_INT, 0, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-
- //        std::vector<std::vector<int>> C_received(numRows, std::vector<int>(numCols));
- //        for (auto& row : C_received) {
- //            MPI_Recv(row.data(), numCols, MPI_INT, 0, 2, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
- //        }
-
- //        int len_size;
- //        MPI_Recv(&len_size, 1, MPI_INT, 0, 3, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-
- //        std::vector<int> len_received(len_size);
- //        MPI_Recv(len_received.data(), len_received.size(), MPI_INT, 0, 4, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-	   
-	// std::cout << "На узле " << world_rank << ", массив C_received:\n";
- //    for (const auto& row : C_received) {
- //        for (int val : row) {
- //            std::cout << val << ' ';
- //        }
- //        std::cout << '\n';
- //    }
- //    std::cout << std::endl;
-
-	// CodingHuffman("Library.txt", "Coding", C_received);
+	   // Принимаем информацию о таблице Хаффмана от процесса с rank = 0
+    MPI_Recv(&numRows, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    C_rectangular.resize(numRows, std::vector<int>(numCols));
+    for (int i = 0; i < numRows; ++i) {
+        MPI_Recv(C_rectangular[i].data(), numCols, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     }
+    MPI_Recv(order.data(), order.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
+    }
     MPI_Finalize();
     return 0;
 }
