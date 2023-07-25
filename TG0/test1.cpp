@@ -324,7 +324,7 @@ int main(int argc, char** argv) {
             }
             MPI_Send(len.data(), len.size(), MPI_INT, i, 3, MPI_COMM_WORLD);
         }
-	CodingHuffman("input.txt", "output.txt", C_rectangular);
+	    CodingHuffman("Library.txt", "Encoded", C_rectangular);
     }
     else {
         MPI_Send(symbols.data(), symbols.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD);
@@ -344,7 +344,7 @@ int main(int argc, char** argv) {
 
         std::vector<int> len_received(len_size);
         MPI_Recv(len_received.data(), len_received.size(), MPI_INT, 0, 4, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-	CodingHuffman("input.txt", "output.txt", C_received);
+	CodingHuffman("Library.txt", "Encoded", C_received);
     }
 
     MPI_Finalize();
