@@ -301,8 +301,17 @@ int main(int argc, char** argv) {
 		}
 	}
 	 std::cout << "\n";
-	 std::cout << "Цена кодирования - " << coding_price << endl;
+	 std::cout << "Цена кодирования - " << coding_price  << " " << C.size << " " << probabilities.size() << endl;
 
+	
+	for (const auto& row : C) {
+        for (int val : row) {
+            std::cout << val << ' ';
+        }
+        std::cout << '\n';
+    }
+    std::cout << std::endl;
+	
 	 std::vector<vector<int>> C_rectangular = transform_to_rectangle(C);
 	int numRows = C_rectangular.size();
         int numCols = C_rectangular[0].size();
