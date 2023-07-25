@@ -231,7 +231,7 @@ int main(int argc, char** argv) {
 	double coding_price=0;
 	for (int i = 0; i < C.size(); i++) {
 		for (int z = 0; z < C.size(); z++) {
-			if (probability[i] == m_P[z]) { // prob - исходный порядо букв в массиве,  m_P - отсортированный
+			if (probabilities[i] == m_P[z]) { // prob - исходный порядо букв в массиве,  m_P - отсортированный
 				if (order[z] == -1) {
 					order[z] = alphabet[i]; //создаем текущий порядок букв
 					std::cout << alphabet[i] << " - ";
