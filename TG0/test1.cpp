@@ -185,7 +185,7 @@ std::string CodingHuffman(const std::string& s_input, const std::string& s_outpu
 
     std::string result;
     for (int n = start_symbol; n < end_symbol; ++n) {
-        for (int i = 0; i < 19; ++i) {
+        for (int i = 0; i < C.size(); ++i) {
             if (file_content[n] == order[i]) {
                 for (int j = 0; j < C[i].size(); ++j) {
                     if (C[i][j] != -1) {
@@ -281,7 +281,7 @@ int main(int argc, char** argv) {
 	 std::cout << "Цена кодирования - " << coding_price << endl;
 	
 	 std::vector<vector<int>> C_rectangular = transform_to_rectangle(C);
-	int numRows = 19;
+	int numRows = C_rectangular.size();
         int numCols = C_rectangular[0].size();
 
         // Посылаем таблицу Хаффмана обратно всем узлам
