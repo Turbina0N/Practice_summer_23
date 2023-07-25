@@ -122,18 +122,7 @@ double Max(vector<double> p) {
 bool myfunction(double i, double j) { return (i > j); }
 
 // Функция для подсчета вероятностей символов в файле
-vector<double> compute_probabilities(const vector<char>& symbols) {
- std::ifstream file("symbols.txt");
-    if (!file) {
-        std::cerr << "Unable to open alphabet file\n";
-        return {};
-    }
-
-    std::vector<char> alphabet;
-    char c;
-    while (file.get(c)) {
-        alphabet.push_back(c);
-    }
+vector<double> compute_probabilities(const vector<char>& symbols,const vector<char>& alphabet) {
     std::cout << alphabet.size();
     map<char, int> counts;
     int total = 0;
@@ -211,8 +200,8 @@ int main(int argc, char** argv) {
 
     int world_size;
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-    std::vector<char> alphabet = load_alphabet("symbols.txt");
-    //std::vector<char> alphabet = { 'q', 'w', 'e', 'r', 't', 'y', ' ', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '@', '.' };
+    //std::vector<char> alphabet = load_alphabet("symbols.txt");
+    std::vector<char> alphabet = { 'q', 'w', 'e', 'r', 't', 'y', ' ', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '@', '.' };
     std::cout <<alphabet.size();
     if (alphabet.empty()) {
         MPI_Finalize();
@@ -251,7 +240,7 @@ int main(int argc, char** argv) {
 
         std::cout << "В файл записано " << symbols.size() << " символов.\n";
 	    
- 	std::vector<double> probabilities = compute_probabilities(symbols);
+ 	std::vector<double> probabilities = compute_probabilities(symbols, alphabet);
         std::vector<vector<int>> C(probabilities.size());
         std::vector<int> len(probabilities.size());
 	std::vector<double> P = probabilities;
