@@ -209,7 +209,11 @@ int main(int argc, char** argv) {
         return 1;
     }
     std::vector<char> symbols = CreateFile(alphabet, world_rank, world_size);
-
+	
+    int numRows = 0;
+    int numCols = 0;
+    std::vector<std::vector<int>> C_rectangular;
+	
     std::cout << "На узле " << world_rank << " сгенерировано " << symbols.size() << " символов.\n";
     if (world_rank == 0) {
         for (int i = 1; i < world_size; ++i) {
@@ -271,7 +275,7 @@ int main(int argc, char** argv) {
 	}
 	std::cout << "\n";
 	std::cout << "Цена кодирования - " << coding_price << endl;
-	std::vector<vector<int>> C_rectangular = transform_to_rectangle(C);
+	C_rectangular = transform_to_rectangle(C);
 	int numRows = C_rectangular.size();
         int numCols = C_rectangular[0].size();
 	for (const auto& row : C_rectangular) {
