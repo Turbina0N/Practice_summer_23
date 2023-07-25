@@ -219,11 +219,14 @@ int main(int argc, char** argv) {
         file.close();
 
         std::cout << "В файл записано " << symbols.size() << " символов.\n";
+	    
  	std::vector<double> probabilities = compute_probabilities(symbols);
         std::vector<vector<int>> C(probabilities.size());
         std::vector<int> len(probabilities.size());
 	std::vector<double> P = probabilities;
-        Huffman(C, len, probabilities);
+	sort(P.begin(), P.end(), myfunction);
+	std::vector<double> m_P = P;
+        Huffman(C, len, P);
 	P.clear();
 	double coding_price=0;
 	for (int i = 0; i < C.size(); i++) {
