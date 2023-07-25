@@ -292,9 +292,8 @@ int main(int argc, char** argv) {
             MPI_Send(C_rectangular[j].data(), numCols, MPI_INT, i, 0, MPI_COMM_WORLD);
         }
         MPI_Send(order.data(), order.size(), MPI_CHAR, i, 0, MPI_COMM_WORLD);
-
-    }
-
+    	}
+	 CodingHuffman("Library.txt", "Coding", C_rectangular);
     }
     else {
         MPI_Send(symbols.data(), symbols.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD);
