@@ -304,7 +304,7 @@ int main(int argc, char** argv) {
 	 std::cout << "\n";
 	 std::cout << "Цена кодирования - " << coding_price << endl;
 
-	std::cout << C.size;
+	std::cout << C.size();
 	for (const auto& row : C) {
         for (int val : row) {
             std::cout << val << ' ';
