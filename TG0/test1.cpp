@@ -590,7 +590,7 @@ int main(int argc, char** argv) {
     	std::string substring = file_content1.substr(start_symbol, symbols_per_process);
 
     	// Вызов функции CodingHuffman с субстрокой
-    	std::string result = CodingHuffman("Coding", C, substring);
+    	std::string encoded = CodingHuffman("Coding", C, substring);
      //std::string encoded = CodingHuffman("Library.txt", "Coding", C_rectangular);
      MPI_Send(encoded.data(), encoded.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD);
      //MPI_Barrier(MPI_COMM_WORLD);
