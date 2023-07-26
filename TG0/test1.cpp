@@ -321,6 +321,39 @@ std::string DecodingHuffman(const std::string& s_input, const std::string& s_out
 }
 
 
+string DecodingHuffman2(string s_input, string s_output, vector<vector<int>> C, int& k) {
+	string result;
+	ifstream input(s_input);
+	string string;
+	ofstream output(s_output);
+	vector<int> code;
+	while (getline(input, string)) {
+		k += string.size();
+		int n = 0;
+		bool flag = 0;
+		int j = 0;
+		while (n != string.size()) {
+			if (string[n] == '0') code.push_back(0);
+			if (string[n] == '1') code.push_back(1);
+			for (int i = 0; i < C.size(); i++) {
+				if (code == C[i]) {
+					flag = 1;//нашелся
+					j = i;
+				}
+			}
+			if (flag) {
+				code.clear();
+				result += order[j];  //И записываешь эту строку в выходной файл
+				flag = 0;
+			}
+			n++;
+		}
+	}
+	output << result;
+	return result;
+	//system("pause");
+}
+
 
 
 
@@ -531,10 +564,11 @@ int main(int argc, char** argv) {
 	int result_size = result1.size();
         MPI_Send(&result_size, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
         MPI_Send(result1.c_str(), result_size, MPI_CHAR, 0, 0, MPI_COMM_WORLD);
+	std::cout << result1.size() ;
     }
 
 
-
+std::string result_2 = DecodingHuffman2("Coding.txt", "Decoding.txt", C_rectangular, k1);
 	
 	
 //CodingRLE_MPI("Library.txt", "CodingRLE.txt");
