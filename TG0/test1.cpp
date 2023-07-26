@@ -419,7 +419,6 @@ int main(int argc, char** argv) {
     std::string file_content1;
     int total_symbols;
     int base_process;
-    int remainder;
     int k1=0, k2=0, k3 = 0, k4 = 0;
 
 	
@@ -519,7 +518,7 @@ int main(int argc, char** argv) {
 	file_content1 = readFile("Library.txt");
 	total_symbols = file_content1.size();
 	base_process = total_symbols / world_size;
-        remainder = total_symbols % world_size;
+        int remainder = total_symbols % world_size;
 
     	// Определение начала и конца обработки каждого процесса
     	int start_symbol = rank * base_process + std::min(rank, remainder);
@@ -581,6 +580,8 @@ int main(int argc, char** argv) {
     	// }	
     	// std::cout << std::endl;	
 
+        int remainder = total_symbols % world_size;
+	    
         // Определение начала и конца обработки каждого процесса
     	int start_symbol = rank * base_process + std::min(rank, remainder);
     	int symbols_per_process = base_process + (rank < remainder ? 1 : 0);
