@@ -193,9 +193,9 @@ std::string CodingHuffman(const std::string& s_input, const std::string& s_outpu
         }
     }
 
-    // // Запись результата в файл
-    // std::ofstream output(s_output + "_part_" + std::to_string(rank)); // каждый процесс создает свой файл
-    // output << result;
+    // Запись результата в файл
+    std::ofstream output(s_output + "_part_" + std::to_string(rank)); // каждый процесс создает свой файл
+    output << result;
 
     return result;
 }
