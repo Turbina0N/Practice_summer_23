@@ -503,13 +503,13 @@ int main(int argc, char** argv) {
             }
         }
     } else {
-        // MPI_Status status;
-        // if (MPI_Recv(chunk.data(), chunk.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD, &status) != MPI_SUCCESS) {
-        //     char err_string[MPI_MAX_ERROR_STRING];
-        //     int len;
-        //     MPI_Error_string(status.MPI_ERROR, err_string, &len);
-        //     printf("MPI_Recv failed with error: %s\n", err_string);
-        // }
+        MPI_Status status;
+        if (MPI_Recv(chunk.data(), chunk.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD, &status) != MPI_SUCCESS) {
+            char err_string[MPI_MAX_ERROR_STRING];
+            int len;
+            MPI_Error_string(status.MPI_ERROR, err_string, &len);
+            printf("MPI_Recv failed with error: %s\n", err_string);
+        }
     }
 
     std::cout << world_rank << ":   " << std::string(chunk.begin(), chunk.end()) << std::endl;
