@@ -478,7 +478,29 @@ int main(int argc, char** argv) {
 
         std::ofstream output("Coding.txt");
         output << encoded;
-	
+
+	std::string result1 = DecodingHuffman("Coding.txt", "Decoding", C_rectangular, k1);
+	std::vector<std::string> results(world_size);
+	results[0] = result;
+        for (int i = 1; i < world_size; i++) {
+            MPI_Status status;
+            int result_size;
+            MPI_Recv(&result_size, 1, MPI_INT, i, 0, MPI_COMM_WORLD, &status);
+            char* buf = new char[result_size + 1];
+            MPI_Recv(buf, result_size, MPI_CHAR, i, 0, MPI_COMM_WORLD, &status);
+            buf[result_size] = '\0';
+            results[i] = std::string(buf);
+            delete[] buf;
+	}
+	// Объединяем результаты и записываем их в один файл
+        std::string combined_result1;
+        for (const auto& res : results) {
+            combined_result += res;
+        }
+
+        std::ofstream output_file("Decoding.txt");
+        output_file << combined_result;
+        output_file.close();
     }
     else {
         MPI_Send(symbols.data(), symbols.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD);
@@ -506,31 +528,11 @@ int main(int argc, char** argv) {
     	// std::cout << std::endl;	
      std::string encoded = CodingHuffman("Library.txt", "Coding", C_rectangular);
      MPI_Send(encoded.data(), encoded.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD);
-    }
 
-    // Выполнить функцию DecodingHuffman на каждом узле
-    std::string filename = "Coding" + std::to_string(world_rank) + ".txt";
-    DecodingHuffman(filename, "Decoding", C_rectangular, k1);
-
-    MPI_Barrier(MPI_COMM_WORLD); // Убедитесь, что все узлы завершили декодирование
-
-    // Теперь соберем все файлы в главном узле
-    if (world_rank == 0) {
-        std::string final_result;
-
-        for (int i = 0; i < world_size; ++i) {
-            std::string filename = "Decoding_part_" + std::to_string(i);
-            std::ifstream in(filename);
-
-            std::string part_result((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
-            final_result += part_result;
-
-            in.close();
-        }
-
-        std::ofstream out("Decoding.txt");
-        out << final_result;
-        out.close();
+	std::string result1 = DecodingHuffman("Coding.txt", "Decoding", C_rectangular, k1);
+	int result_size = result1.size();
+        MPI_Send(&result_size, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
+        MPI_Send(result.c_str(), result_size, MPI_CHAR, 0, 0, MPI_COMM_WORLD);
     }
 
 
