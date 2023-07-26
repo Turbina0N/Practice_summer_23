@@ -285,13 +285,26 @@ std::string CodingHuffman(const std::string& s_input, const std::string& s_outpu
 }
 
 std::string DecodingHuffman(const std::string& s_input, const std::string& s_output, 
-                            const std::vector<std::vector<int>>& C, 
-                            int start_symbol, int symbols_per_process, int& k) {
+                            const std::vector<std::vector<int>>& C, int& k) {
+int rank, world_size;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+
+    // Все процессы сначала читают весь файл
+    std::string file_content = readFile(s_input);
+    int total_symbols = file_content.size();
+
+    int base_process = total_symbols / world_size;
+    int remainder = total_symbols % world_size;
+
+    // Определение начала и конца обработки каждого процесса
+    int start_symbol = rank * base_process + std::min(rank, remainder);
+    int symbols_per_process = base_process + (rank < remainder ? 1 : 0);
+    int end_symbol = start_symbol + symbols_per_process;
     std::string file_content = readFile(s_input);
 
     std::string result;
     std::vector<int> code;
-    int end_symbol = start_symbol + symbols_per_process;
 
     for (int n = start_symbol; n < end_symbol; ++n) {
         k += 1;  // Увеличиваем количество обработанных символов
@@ -514,7 +527,6 @@ int main(int argc, char** argv) {
             final_result += part_result;
 
             in.close();
-            // std::remove(filename.c_str()); // Удаляем временный файл (опционально)
         }
 
         std::ofstream out("Decoding.txt");
