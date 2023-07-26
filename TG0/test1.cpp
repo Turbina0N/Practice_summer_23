@@ -454,7 +454,6 @@ int main(int argc, char** argv) {
 	std::cout << "Отправилось с rank =0 "<< std::endl; 
 
 	CodingHuffman("Library.txt", "Coding", C_rectangular);
-	MPI_Barrier(MPI_COMM_WORLD);
 
         // Принимаем закодированные строки от всех остальных узлов и записываем их в файл
         std::string encoded;
