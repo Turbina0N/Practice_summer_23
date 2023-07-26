@@ -311,7 +311,11 @@ int main(int argc, char** argv) {
         return 1;
     }
     std::vector<char> symbols = CreateFile(alphabet, world_rank, world_size);
-    std::cout <<"rank = "<< world_rank << "\t"<< symbols <<std::endl;
+    std::cout <<"rank = "<< world_rank << "\t"<<std::endl;
+    for (auto c: symbols){
+	    std::cout << c;
+    }
+	std::cout<<std::endl;
  //    int numRows = 0;
  //    int numCols = 0;
  //    std::vector<std::vector<int>> C_rectangular;
