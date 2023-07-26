@@ -290,22 +290,14 @@ std::string DecodingHuffman(const std::string& s_input, const std::string& s_out
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
-    // Все процессы сначала читают весь файл
-    std::string file_content = readFile(s_input);
+    // Процессы открывают и читают соответствующий файл
+    std::string file_content = readFile(s_input + "_part_" + std::to_string(rank));
     int total_symbols = file_content.size();
-
-    int base_process = total_symbols / world_size;
-    int remainder = total_symbols % world_size;
-
-    // Определение начала и конца обработки каждого процесса
-    int start_symbol = rank * base_process + std::min(rank, remainder);
-    int symbols_per_process = base_process + (rank < remainder ? 1 : 0);
-    int end_symbol = start_symbol + symbols_per_process;
 
     std::string result;
     std::vector<int> code;
 
-    for (int n = start_symbol; n < end_symbol; ++n) {
+    for (int n = 0; n < total_symbols; ++n) {
         k += 1;  // Увеличиваем количество обработанных символов
         if (file_content[n] == '0') code.push_back(0);
         else if (file_content[n] == '1') code.push_back(1);
@@ -327,6 +319,7 @@ std::string DecodingHuffman(const std::string& s_input, const std::string& s_out
 
     return result;
 }
+
 
 
 
@@ -481,7 +474,7 @@ int main(int argc, char** argv) {
         std::ofstream output("Coding.txt");
         output << encoded;
 
-	std::string result1 = DecodingHuffman("Coding.txt", "Decoding", C_rectangular, k1);
+	std::string result1 = DecodingHuffman("Coding", "Decoding", C_rectangular, k1);
 	std::vector<std::string> results(world_size);
 	results[0] = result1;
         for (int i = 1; i < world_size; i++) {
@@ -531,7 +524,7 @@ int main(int argc, char** argv) {
      std::string encoded = CodingHuffman("Library.txt", "Coding", C_rectangular);
      MPI_Send(encoded.data(), encoded.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD);
 
-	std::string result1 = DecodingHuffman("Coding.txt", "Decoding", C_rectangular, k1);
+	std::string result1 = DecodingHuffman("Coding", "Decoding", C_rectangular, k1);
 	int result_size = result1.size();
         MPI_Send(&result_size, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
         MPI_Send(result1.c_str(), result_size, MPI_CHAR, 0, 0, MPI_COMM_WORLD);
