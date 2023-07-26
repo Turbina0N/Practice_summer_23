@@ -406,21 +406,10 @@ int main(int argc, char** argv) {
     }
 
     std::vector<char> symbols = CreateFile(alphabet, world_rank, world_size);
-    //MPI_Barrier(MPI_COMM_WORLD);
- //    std::cout <<"rank = "<< world_rank << "\t"<<std::endl;
- //    for (auto c: symbols){
-	//     std::cout << c;
- //    }
-	// std::cout<<std::endl;
-	
     int numRows = 0;
     int numCols = 0;
     std::vector<std::vector<int>> C_rectangular;
-    // std::string file_content1;
-    // int total_symbols;
-    // int base_process;
     int k1=0, k2=0, k3 = 0, k4 = 0;
-
 	
     std::cout << "На узле " << world_rank << " сгенерировано " << symbols.size() << " символов.\n";
     if (world_rank == 0) {
@@ -438,7 +427,7 @@ int main(int argc, char** argv) {
         }
 
         std::cout << "Узел с rank 0 получил " << symbols.size() << " символов.\n";
-        //MPI_Barrier(MPI_COMM_WORLD);
+	    
         std::ofstream file("Library.txt");
         if (!file) {
             std::cerr << "Unable to open file for writing\n";
@@ -514,44 +503,6 @@ int main(int argc, char** argv) {
 	MPI_Send(order.data(), orderSize, MPI_CHAR, i, 0, MPI_COMM_WORLD);
 	}
 	std::cout << "Отправилось с rank =0 "<< std::endl; 
-
-	// file_content1 = readFile("Library.txt");
-	// total_symbols = file_content1.size();
-	// base_process = total_symbols / world_size;
- //        int remainder = total_symbols % world_size;
-
- //    	// Определение начала и конца обработки каждого процесса
- //    	int start_symbol = world_rank * base_process + std::min(world_rank, remainder);
- //    	int symbols_per_process = base_process + (world_rank < remainder ? 1 : 0);
- //    	int end_symbol = start_symbol + symbols_per_process;
-
- //    	// Субстрока для этого процесса
- //    	std::string substring = file_content1.substr(start_symbol, symbols_per_process);
-
- //    	// Вызов функции CodingHuffman с субстрокой
- //    	std::string result = CodingHuffman("Coding", C_rectangular, substring);
-	CodingHuffman("Library.txt", "Coding", C_rectangular);
-
-        // Принимаем закодированные строки от всех остальных узлов и записываем их в файл
-        std::string encoded;
-        for (int i = 1; i < world_size; ++i) {
-            MPI_Status status;
-            MPI_Probe(i, 0, MPI_COMM_WORLD, &status);
-
-            int size;
-            MPI_Get_count(&status, MPI_CHAR, &size);
-
-            std::vector<char> received_data(size);
-            MPI_Recv(received_data.data(), size, MPI_CHAR, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-
-            std::string received_str(received_data.begin(), received_data.end());
-            encoded += received_str;
-        }
-
-        std::ofstream output("Coding.txt");
-        output << encoded;
-        //MPI_Barrier(MPI_COMM_WORLD);
-	
 	
     }
     else {
@@ -579,23 +530,55 @@ int main(int argc, char** argv) {
      //    std::cout << '\n';
     	// }	
     	// std::cout << std::endl;	
-
-     //    int remainder = total_symbols % world_size;
-	    
-     //    // Определение начала и конца обработки каждого процесса
-    	// int start_symbol = world_rank * base_process + std::min(world_rank, remainder);
-    	// int symbols_per_process = base_process + (world_rank < remainder ? 1 : 0);
-    	// int end_symbol = start_symbol + symbols_per_process;
-
-    	// // Субстрока для этого процесса
-    	// std::string substring = file_content1.substr(start_symbol, symbols_per_process);
-
-    	// // Вызов функции CodingHuffman с субстрокой
-    	// std::string encoded = CodingHuffman("Coding", C_rectangular, substring);
-     std::string encoded = CodingHuffman("Library.txt", "Coding", C_rectangular);
-     MPI_Send(encoded.data(), encoded.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD);
-     //MPI_Barrier(MPI_COMM_WORLD);
     }
+
+	
+MPI_Barrier(MPI_COMM_WORLD);
+std::string file_content;
+    if (world_rank == 0) {
+        // В процессе с рангом 0 считываем весь файл
+        file_content = readFile("Library.txt");
+    }
+
+    int total_symbols = file_content.size();
+    int base_process = total_symbols / world_size;
+    int remainder = total_symbols % world_size;
+
+    // Определение начала и конца обработки каждого процесса
+    int start_symbol = world_rank * base_process + std::min(world_rank, remainder);
+    int symbols_per_process = base_process + (world_rank < remainder ? 1 : 0);
+    int end_symbol = start_symbol + symbols_per_process;
+
+    // Субстрока для этого процесса
+    std::string substring = file_content.substr(start_symbol, symbols_per_process);
+
+    // Вызов функции CodingHuffman с субстрокой
+    std::string result = CodingHuffman("Coding", C_rectangular, substring);
+    
+ if (world_rank == 0) {
+        // Принимаем закодированные строки от всех остальных узлов и записываем их в файл
+        std::string encoded = CodingHuffman("Coding", C_rectangular, substring);
+        for (int i = 1; i < world_size; ++i) {
+            MPI_Status status;
+            MPI_Probe(i, 0, MPI_COMM_WORLD, &status);
+
+            int size;
+            MPI_Get_count(&status, MPI_CHAR, &size);
+
+            std::vector<char> received_data(size);
+            MPI_Recv(received_data.data(), size, MPI_CHAR, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+            std::string received_str(received_data.begin(), received_data.end());
+            encoded += received_str;
+        }
+
+        std::ofstream output("Coding.txt");
+        output << encoded;
+ }
+else {
+     std::string encoded = CodingHuffman("Coding", C_rectangular, substring);
+     MPI_Send(encoded.data(), encoded.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD);
+}
 	
 	
 //CodingRLE_MPI("Library.txt", "CodingRLE.txt");
