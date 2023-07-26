@@ -425,10 +425,11 @@ int main(int argc, char** argv) {
 
  //        // std::ofstream output("Coding.txt");
  //        // output << encoded;
- //    }
+    }
     else {
         MPI_Send(symbols.data(), symbols.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD);
 	std::cout << "Process " << world_rank << " sent message to process 0\n";
+	    
 	// // // Принимаем информацию о таблице Хаффмана от процесса с rank = 0
  // //    MPI_Recv(&numRows, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
  // //    C_rectangular.resize(numRows, std::vector<int>(numCols));
@@ -497,12 +498,12 @@ int main(int argc, char** argv) {
 //     std::cout << world_rank << ":   " << std::string(chunk.begin(), chunk.end()) << std::endl;
 // }
 	
- if (world_rank == 0) {
+//  if (world_rank == 0) {
 	 
- }
-else {
+//  }
+// else {
 	
-}
+// }
 
     MPI_Finalize();
     return 0;
