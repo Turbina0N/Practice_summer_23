@@ -380,6 +380,10 @@ string DecodingHuffman2(string s_input, string s_output, vector<vector<int>> C, 
 	//system("pause");
 }
 
+std::vector<char> readFile2(const std::string& filename) {
+    std::ifstream file(filename, std::ios::binary);
+    return std::vector<char>((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+}
 
 
 
@@ -536,7 +540,7 @@ int main(int argc, char** argv) {
 MPI_Barrier(MPI_COMM_WORLD);
 std::vector<char> file_content;
     if (world_rank == 0) {
-        file_content = readFile("Library.txt");
+        file_content = readFile2("Library.txt");
     }
 
     int total_symbols = file_content.size();
