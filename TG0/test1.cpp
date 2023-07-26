@@ -16,21 +16,21 @@ static const int N = 10000;
 static std::vector<char> order(19,-1);
 static std::vector<char> orderNew(19,-1);
 
-// std::vector<char> load_alphabet(const std::string& filename) {
-//     std::ifstream file(filename);
-//     if (!file) {
-//         std::cerr << "Unable to open alphabet file\n";
-//         return {};
-//     }
-//     std::vector<char> alphabet;
-//     char c;
-//     while (file.get(c)) {
-//         alphabet.push_back(c);
-//     }
-// std::cout << alphabet.size(); 
-// for (auto c : alphabet) std::cout<<c<<" ";
-//     return alphabet;
-// }
+std::vector<char> load_alphabet(const std::string& filename) {
+    std::ifstream file(filename);
+    if (!file) {
+        std::cerr << "Unable to open alphabet file\n";
+        return {};
+    }
+    std::vector<char> alphabet;
+    char c;
+    while (file.get(c)) {
+        alphabet.push_back(c);
+    }
+std::cout << alphabet.size(); 
+for (auto c : alphabet) std::cout<<c<<" ";
+    return alphabet;
+}
 
 std::vector<char> CreateFile(const std::vector<char>& alphabet, int process_id, int world_size) {
     srand(time(NULL) ^ process_id);
@@ -303,8 +303,8 @@ int main(int argc, char** argv) {
 
     int world_size;
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-    //std::vector<char> alphabet = load_alphabet("symbols.txt");
-    std::vector<char> alphabet = { 'q', 'w', 'e', 'r', 't', 'y', ' ', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '@', '.' };
+    std::vector<char> alphabet = load_alphabet("symbols.txt");
+    //std::vector<char> alphabet = { 'q', 'w', 'e', 'r', 't', 'y', ' ', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '@', '.' };
     std::cout <<alphabet.size();
     if (alphabet.empty()) {
         MPI_Finalize();
