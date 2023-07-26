@@ -521,8 +521,8 @@ int main(int argc, char** argv) {
         int remainder = total_symbols % world_size;
 
     	// Определение начала и конца обработки каждого процесса
-    	int start_symbol = rank * base_process + std::min(rank, remainder);
-    	int symbols_per_process = base_process + (rank < remainder ? 1 : 0);
+    	int start_symbol = world_rank * base_process + std::min(world_rank, remainder);
+    	int symbols_per_process = base_process + (world_rank < remainder ? 1 : 0);
     	int end_symbol = start_symbol + symbols_per_process;
 
     	// Субстрока для этого процесса
@@ -583,8 +583,8 @@ int main(int argc, char** argv) {
         int remainder = total_symbols % world_size;
 	    
         // Определение начала и конца обработки каждого процесса
-    	int start_symbol = rank * base_process + std::min(rank, remainder);
-    	int symbols_per_process = base_process + (rank < remainder ? 1 : 0);
+    	int start_symbol = world_rank * base_process + std::min(world_rank, remainder);
+    	int symbols_per_process = base_process + (world_rank < remainder ? 1 : 0);
     	int end_symbol = start_symbol + symbols_per_process;
 
     	// Субстрока для этого процесса
