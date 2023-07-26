@@ -481,8 +481,8 @@ int main(int argc, char** argv) {
         remainder = total_symbols % world_size;
     }
 
-    // MPI_Bcast(&base_process, 1, MPI_INT, 0, MPI_COMM_WORLD);
-    // MPI_Bcast(&remainder, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&base_process, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&remainder, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
     int start_symbol = world_rank * base_process + std::min(world_rank, remainder);
     int symbols_per_process = base_process + (world_rank < remainder ? 1 : 0);
