@@ -446,7 +446,7 @@ int main(int argc, char** argv) {
 //CodingRLE_MPI("Library.txt", "CodingRLE.txt");
 //Coding RLE
 {
-     std::string file_RLE;
+    std::string file_RLE;
     if (world_rank == 0) {
         file_RLE = readFile("Library.txt");
     }
@@ -473,15 +473,19 @@ int main(int argc, char** argv) {
             int symbols_per_process_i = base_process + (i < remainder ? 1 : 0);
             MPI_Status status;
             if (MPI_Send(file_RLE.data() + start_symbol_i, symbols_per_process_i, MPI_CHAR, i, 0, MPI_COMM_WORLD) != MPI_SUCCESS) {
+                char err_string[MPI_MAX_ERROR_STRING];
+                int len;
                 MPI_Error_string(status.MPI_ERROR, err_string, &len);
-                printf("MPI_Send failed with error code %d\n", status.MPI_ERROR);
+                printf("MPI_Send failed with error: %s\n", err_string);
             }
         }
     } else {
         MPI_Status status;
         if (MPI_Recv(chunk.data(), chunk.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD, &status) != MPI_SUCCESS) {
+            char err_string[MPI_MAX_ERROR_STRING];
+            int len;
             MPI_Error_string(status.MPI_ERROR, err_string, &len);
-            printf("MPI_Recv failed with error code %d\n", status.MPI_ERROR);
+            printf("MPI_Recv failed with error: %s\n", err_string);
         }
     }
 
