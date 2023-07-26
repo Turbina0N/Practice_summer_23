@@ -465,7 +465,7 @@ int main(int argc, char** argv) {
      //MPI_Send(encoded.data(), encoded.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD);
     }
 	
-CodingRLE_MPI("Library.txt", "CodingRLE.txt");
+//CodingRLE_MPI("Library.txt", "CodingRLE.txt");
 //Coding RLE
 {
     std::string file_RLE;
