@@ -489,7 +489,7 @@ int main(int argc, char** argv) {
 
     std::vector<char> chunk(symbols_per_process);
 
-    // if (world_rank == 0) {
+    if (world_rank == 0) {
     //     chunk.assign(file_RLE.begin() + start_symbol, file_RLE.begin() + start_symbol + symbols_per_process);
     //     for (int i = 1; i < world_size; i++) {
     //         int start_symbol_i = i * base_process + std::min(i, remainder);
