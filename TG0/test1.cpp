@@ -441,14 +441,40 @@ int main(int argc, char** argv) {
 	
 //CodingRLE_MPI("Library.txt", "CodingRLE.txt");
 //Coding RLE
-string file_RLE = readFile("Library.txt");
-int total_symbols = file_RLE.size();
-int base_process = total_symbols / world_size;
-int remainder = total_symbols % world_size;
-int start_symbol = world_rank * base_process + std::min(world_rank, remainder);
-int symbols_per_process = base_process + (world_rank < remainder ? 1 : 0);
-string chunk = file_RLE.substr(start_symbol, symbols_per_process);
-std::cout<<world_rank << ":   " << chunk << std::endl;
+{
+    std::string file_RLE;
+    if (world_rank == 0) {
+        file_RLE = readFile("Library.txt");
+    }
+    int base_process;
+    int remainder;
+    if (world_rank == 0) {
+        int total_symbols = file_RLE.size();
+        base_process = total_symbols / world_size;
+        remainder = total_symbols % world_size;
+    }
+
+    MPI_Bcast(&base_process, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&remainder, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+    int start_symbol = world_rank * base_process + std::min(world_rank, remainder);
+    int symbols_per_process = base_process + (world_rank < remainder ? 1 : 0);
+    std::vector<char> chunk(symbols_per_process);
+    
+    if (world_rank == 0) {
+        chunk.assign(file_RLE.begin() + start_symbol, file_RLE.begin() + start_symbol + symbols_per_process);
+        for (int i = 1; i < world_size; i++) {
+            int start_symbol_i = i * base_process + std::min(i, remainder);
+            int symbols_per_process_i = base_process + (i < remainder ? 1 : 0);
+            MPI_Send(file_RLE.data() + start_symbol_i, symbols_per_process_i, MPI_CHAR, i, 0, MPI_COMM_WORLD);
+        }
+    } else {
+        MPI_Recv(chunk.data(), chunk.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    }
+
+    std::cout << world_rank << ":   " << std::string(chunk.begin(), chunk.end()) << std::endl;
+}
+	
  if (world_rank == 0) {
 	 
  }
