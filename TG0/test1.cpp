@@ -493,13 +493,13 @@ int main(int argc, char** argv) {
             delete[] buf;
 	}
 	// Объединяем результаты и записываем их в один файл
-        std::string combined_result1;
+        std::string combined_result_dec1;
         for (const auto& res : results) {
-            combined_result += res;
+             combined_result_dec1 += res;
         }
 
         std::ofstream output_file("Decoding.txt");
-        output_file << combined_result;
+        output_file <<  combined_result_dec1;
         output_file.close();
     }
     else {
@@ -532,7 +532,7 @@ int main(int argc, char** argv) {
 	std::string result1 = DecodingHuffman("Coding.txt", "Decoding", C_rectangular, k1);
 	int result_size = result1.size();
         MPI_Send(&result_size, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
-        MPI_Send(result.c_str(), result_size, MPI_CHAR, 0, 0, MPI_COMM_WORLD);
+        MPI_Send(result1.c_str(), result_size, MPI_CHAR, 0, 0, MPI_COMM_WORLD);
     }
 
 
