@@ -380,7 +380,7 @@ int main(int argc, char** argv) {
     }
 
     std::vector<char> symbols = CreateFile(alphabet, world_rank, world_size);
-    MPI_Barrier(MPI_COMM_WORLD);
+    //MPI_Barrier(MPI_COMM_WORLD);
  //    std::cout <<"rank = "<< world_rank << "\t"<<std::endl;
  //    for (auto c: symbols){
 	//     std::cout << c;
@@ -409,7 +409,7 @@ int main(int argc, char** argv) {
         }
 
         std::cout << "Узел с rank 0 получил " << symbols.size() << " символов.\n";
-        MPI_Barrier(MPI_COMM_WORLD);
+        //MPI_Barrier(MPI_COMM_WORLD);
         std::ofstream file("Library.txt");
         if (!file) {
             std::cerr << "Unable to open file for writing\n";
@@ -506,7 +506,7 @@ int main(int argc, char** argv) {
 
         std::ofstream output("Coding.txt");
         output << encoded;
-        MPI_Barrier(MPI_COMM_WORLD);
+        //MPI_Barrier(MPI_COMM_WORLD);
 	std::string result1 = DecodingHuffman("Coding", "Decoding", C_rectangular, k1);
 	std::vector<std::string> results(world_size);
 	results[0] = result1;
@@ -534,7 +534,7 @@ int main(int argc, char** argv) {
     else {
         MPI_Send(symbols.data(), symbols.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD);
 	std::cout << "Process " << world_rank << " sent message to process 0\n";
-	MPI_Barrier(MPI_COMM_WORLD);
+	//MPI_Barrier(MPI_COMM_WORLD);
 	    
 	// Принимаем информацию о таблице Хаффмана от процесса с rank = 0
 	MPI_Recv(&numRows, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
@@ -558,7 +558,7 @@ int main(int argc, char** argv) {
     	// std::cout << std::endl;	
      std::string encoded = CodingHuffman("Library.txt", "Coding", C_rectangular);
      MPI_Send(encoded.data(), encoded.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD);
-     MPI_Barrier(MPI_COMM_WORLD);
+     //MPI_Barrier(MPI_COMM_WORLD);
 	    
 	std::string result1 = DecodingHuffman("Coding", "Decoding", C_rectangular, k1);
 	int result_size = result1.size();
