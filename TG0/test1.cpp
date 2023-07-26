@@ -481,7 +481,7 @@ int main(int argc, char** argv) {
 
 	std::string result1 = DecodingHuffman("Coding.txt", "Decoding", C_rectangular, k1);
 	std::vector<std::string> results(world_size);
-	results[0] = result;
+	results[0] = result1;
         for (int i = 1; i < world_size; i++) {
             MPI_Status status;
             int result_size;
