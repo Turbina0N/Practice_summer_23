@@ -404,6 +404,18 @@ int main(int argc, char** argv) {
     	}	
     	std::cout << std::endl;
 
+	// for (int i = 1; i < world_size; ++i) {
+	// MPI_Send(&numRows, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
+	// MPI_Send(&numCols, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
+	// for (int j = 0; j < numRows; ++j) {
+	// 	MPI_Send(C_rectangular[j].data(), numCols, MPI_INT, i, 0, MPI_COMM_WORLD);
+	// }
+	// int orderSize = order.size();
+	// MPI_Send(&orderSize, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
+	// MPI_Send(order.data(), orderSize, MPI_CHAR, i, 0, MPI_COMM_WORLD);
+	// }
+	// std::cout << "Отправилось с rank =0 "<< std::endl; 
+
 	// CodingHuffman("Library.txt", "Coding", C_rectangular);
 
  //        // Принимаем закодированные строки от всех остальных узлов и записываем их в файл
@@ -428,94 +440,85 @@ int main(int argc, char** argv) {
     else {
         MPI_Send(symbols.data(), symbols.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD);
 	std::cout << "Process " << world_rank << " sent message to process 0\n";
+	    
+	// // Принимаем информацию о таблице Хаффмана от процесса с rank = 0
+	// MPI_Recv(&numRows, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+	// MPI_Recv(&numCols, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+	// C_rectangular.resize(numRows, std::vector<int>(numCols));
+	// for (int i = 0; i < numRows; ++i) {
+	//     MPI_Recv(C_rectangular[i].data(), numCols, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+	// }
 	
+	// int orderSize;
+	// MPI_Recv(&orderSize, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+	// order.resize(orderSize);
+	// MPI_Recv(order.data(), orderSize, MPI_CHAR, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+ //        for (const auto& row : C_rectangular) {
+ //        for (int val : row) {
+ //            std::cout << val << ' ';
+ //        }
+ //        std::cout << '\n';
+ //    	}	
+ //    	std::cout << std::endl;	
      //std::string encoded = CodingHuffman("Library.txt", "Coding", C_rectangular);
      //MPI_Send(encoded.data(), encoded.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD);
     }
 	
-//CodingRLE_MPI("Library.txt", "CodingRLE.txt");
+CodingRLE_MPI("Library.txt", "CodingRLE.txt");
 //Coding RLE
 // {
-//     std::string file_RLE;
-//     if (world_rank == 0) {
-//         file_RLE = readFile("Library.txt");
-//     }
+    std::string file_RLE;
+    if (world_rank == 0) {
+        file_RLE = readFile("Library.txt");
+    }
 
-//     int base_process, remainder;
-//     if (world_rank == 0) {
-//         int total_symbols = file_RLE.size();
-//         base_process = total_symbols / world_size;
-//         remainder = total_symbols % world_size;
-//     }
+    int base_process, remainder;
+    if (world_rank == 0) {
+        int total_symbols = file_RLE.size();
+        base_process = total_symbols / world_size;
+        remainder = total_symbols % world_size;
+    }
 
-//     MPI_Bcast(&base_process, 1, MPI_INT, 0, MPI_COMM_WORLD);
-//     MPI_Bcast(&remainder, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&base_process, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&remainder, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
-//     int start_symbol = world_rank * base_process + std::min(world_rank, remainder);
-//     int symbols_per_process = base_process + (world_rank < remainder ? 1 : 0);
+    int start_symbol = world_rank * base_process + std::min(world_rank, remainder);
+    int symbols_per_process = base_process + (world_rank < remainder ? 1 : 0);
 
-//     std::vector<char> chunk(symbols_per_process);
+    std::vector<char> chunk(symbols_per_process);
 
-//     if (world_rank == 0) {
-//         chunk.assign(file_RLE.begin() + start_symbol, file_RLE.begin() + start_symbol + symbols_per_process);
-//         for (int i = 1; i < world_size; i++) {
-//             int start_symbol_i = i * base_process + std::min(i, remainder);
-//             int symbols_per_process_i = base_process + (i < remainder ? 1 : 0);
-//             MPI_Status status;
-//             if (MPI_Send(file_RLE.data() + start_symbol_i, symbols_per_process_i, MPI_CHAR, i, 0, MPI_COMM_WORLD) != MPI_SUCCESS) {
-//                 char err_string[MPI_MAX_ERROR_STRING];
-//                 int len;
-//                 MPI_Error_string(status.MPI_ERROR, err_string, &len);
-//                 printf("MPI_Send failed with error: %s\n", err_string);
-//             }
-//         }
-//     } else {
-//         MPI_Status status;
-//         if (MPI_Recv(chunk.data(), chunk.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD, &status) != MPI_SUCCESS) {
-//             char err_string[MPI_MAX_ERROR_STRING];
-//             int len;
-//             MPI_Error_string(status.MPI_ERROR, err_string, &len);
-//             printf("MPI_Recv failed with error: %s\n", err_string);
-//         }
-//     }
+    if (world_rank == 0) {
+        chunk.assign(file_RLE.begin() + start_symbol, file_RLE.begin() + start_symbol + symbols_per_process);
+        for (int i = 1; i < world_size; i++) {
+            int start_symbol_i = i * base_process + std::min(i, remainder);
+            int symbols_per_process_i = base_process + (i < remainder ? 1 : 0);
+            MPI_Status status;
+            if (MPI_Send(file_RLE.data() + start_symbol_i, symbols_per_process_i, MPI_CHAR, i, 0, MPI_COMM_WORLD) != MPI_SUCCESS) {
+                char err_string[MPI_MAX_ERROR_STRING];
+                int len;
+                MPI_Error_string(status.MPI_ERROR, err_string, &len);
+                printf("MPI_Send failed with error: %s\n", err_string);
+            }
+        }
+    } else {
+        MPI_Status status;
+        if (MPI_Recv(chunk.data(), chunk.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD, &status) != MPI_SUCCESS) {
+            char err_string[MPI_MAX_ERROR_STRING];
+            int len;
+            MPI_Error_string(status.MPI_ERROR, err_string, &len);
+            printf("MPI_Recv failed with error: %s\n", err_string);
+        }
+    }
 
-//     std::cout << world_rank << ":   " << std::string(chunk.begin(), chunk.end()) << std::endl;
-// }
+    std::cout << world_rank << ":   " << std::string(chunk.begin(), chunk.end()) << std::endl;
+}
 	
  if (world_rank == 0) {
-	for (int i = 1; i < world_size; ++i) {
-	MPI_Send(&numRows, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
-	MPI_Send(&numCols, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
-	for (int j = 0; j < numRows; ++j) {
-		MPI_Send(C_rectangular[j].data(), numCols, MPI_INT, i, 0, MPI_COMM_WORLD);
-	}
-	int orderSize = order.size();
-	MPI_Send(&orderSize, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
-	MPI_Send(order.data(), orderSize, MPI_CHAR, i, 0, MPI_COMM_WORLD);
-	}
-	std::cout << "Отправилось с rank =0 "<< std::endl; 
+	
  }
 else {
-	// Принимаем информацию о таблице Хаффмана от процесса с rank = 0
-	MPI_Recv(&numRows, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-	MPI_Recv(&numCols, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-	C_rectangular.resize(numRows, std::vector<int>(numCols));
-	for (int i = 0; i < numRows; ++i) {
-	    MPI_Recv(C_rectangular[i].data(), numCols, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-	}
 	
-	int orderSize;
-	MPI_Recv(&orderSize, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-	order.resize(orderSize);
-	MPI_Recv(order.data(), orderSize, MPI_CHAR, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-
-        for (const auto& row : C_rectangular) {
-        for (int val : row) {
-            std::cout << val << ' ';
-        }
-        std::cout << '\n';
-    	}	
-    	std::cout << std::endl;	
 }
 
     MPI_Finalize();
