@@ -195,13 +195,6 @@ std::string CodingHuffman(const std::string& s_input, const std::string& s_outpu
     return result;
 }
 
-string readFile(const string& filename) {
-    ifstream file(filename);
-    stringstream buffer;
-    buffer << file.rdbuf();
-    return buffer.str();
-}
-
 std::string CodingRLE(std::string chunk) {
     std::string result;
     int count = 1;
