@@ -512,7 +512,7 @@ int main(int argc, char** argv) {
         }
     }
 
-    std::cout << world_rank << ":   " << std::string(chunk.begin(), chunk.end()) << std::endl;
+    std::cout << world_rank << ":   " << std::string(chunk.begin(), chunk.end()) <<"\n\n" << std::endl;
 }
 	
  if (world_rank == 0) {
