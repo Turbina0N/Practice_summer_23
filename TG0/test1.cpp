@@ -27,8 +27,8 @@ std::vector<char> load_alphabet(const std::string& filename) {
     while (file.get(c)) {
         alphabet.push_back(c);
     }
-std::cout << alphabet.size(); 
-for (auto c : alphabet) std::cout<<c<<" ";
+// std::cout << alphabet.size(); 
+// for (auto c : alphabet) std::cout<<c<<" ";
     return alphabet;
 }
 
