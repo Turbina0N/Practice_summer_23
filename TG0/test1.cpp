@@ -467,7 +467,7 @@ int main(int argc, char** argv) {
 	
 CodingRLE_MPI("Library.txt", "CodingRLE.txt");
 //Coding RLE
-// {
+{
     std::string file_RLE;
     if (world_rank == 0) {
         file_RLE = readFile("Library.txt");
