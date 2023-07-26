@@ -297,24 +297,24 @@ int main(int argc, char** argv) {
 
 	CodingHuffman("Library.txt", "Coding", C_rectangular);
 
-        // Принимаем закодированные строки от всех остальных узлов и записываем их в файл
-        std::string encoded;
-        for (int i = 1; i < world_size; ++i) {
-            MPI_Status status;
-            MPI_Probe(i, 0, MPI_COMM_WORLD, &status);
+        // // Принимаем закодированные строки от всех остальных узлов и записываем их в файл
+        // std::string encoded;
+        // for (int i = 1; i < world_size; ++i) {
+        //     MPI_Status status;
+        //     MPI_Probe(i, 0, MPI_COMM_WORLD, &status);
 
-            int size;
-            MPI_Get_count(&status, MPI_CHAR, &size);
+        //     int size;
+        //     MPI_Get_count(&status, MPI_CHAR, &size);
 
-            std::vector<char> received_data(size);
-            MPI_Recv(received_data.data(), size, MPI_CHAR, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        //     std::vector<char> received_data(size);
+        //     MPI_Recv(received_data.data(), size, MPI_CHAR, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-            std::string received_str(received_data.begin(), received_data.end());
-            encoded += received_str;
-        }
+        //     std::string received_str(received_data.begin(), received_data.end());
+        //     encoded += received_str;
+        // }
 
-        std::ofstream output("Coding.txt");
-        output << encoded;
+        // std::ofstream output("Coding.txt");
+        // output << encoded;
     }
     else {
         MPI_Send(symbols.data(), symbols.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD);
@@ -336,8 +336,8 @@ int main(int argc, char** argv) {
     	}	
     	std::cout << std::endl;
 
-     std::string encoded = CodingHuffman("Library.txt", "Coding", C_rectangular);
-     MPI_Send(encoded.data(), encoded.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD);
+     //std::string encoded = CodingHuffman("Library.txt", "Coding", C_rectangular);
+     //MPI_Send(encoded.data(), encoded.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD);
     }
     MPI_Finalize();
     return 0;
