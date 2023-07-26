@@ -355,46 +355,47 @@ int main(int argc, char** argv) {
 
 
 	    
- // 	std::vector<double> probabilities = compute_probabilities(symbols, alphabet);
- //        std::vector<vector<int>> C(probabilities.size());
- //        std::vector<int> len(probabilities.size());
-	// std::vector<double> P = probabilities;
-	// sort(P.begin(), P.end(), myfunction);
-	// std::vector<double> m_P = P;
- //        Huffman(C, len, P);
-	// P.clear();
-	// double coding_price=0;    
-	// for (int i = 0; i < C.size(); i++) {
-	// 	for (int z = 0; z < C.size(); z++) {
-	// 		if (probabilities[i] == m_P[z]) { // prob - исходный порядо букв в массиве,  m_P - отсортированный
-	// 			if (order[z] == -1) {
-	// 				order[z] = alphabet[i]; //создаем текущий порядок букв
-	// 				std::cout << alphabet[i] << " - ";
-	// 				for (int j = 0; j < C[z].size(); j++) {
-	// 					 std::cout << C[z][j];
-	// 				}
-	// 				 std::cout << "\n";
+ 	std::vector<double> probabilities = compute_probabilities(symbols, alphabet);
+        std::vector<vector<int>> C(probabilities.size());
+	std::cout << C.size() << std::endl;
+        std::vector<int> len(probabilities.size());
+	std::vector<double> P = probabilities;
+	sort(P.begin(), P.end(), myfunction);
+	std::vector<double> m_P = P;
+        Huffman(C, len, P);
+	P.clear();
+	double coding_price=0;    
+	for (int i = 0; i < C.size(); i++) {
+		for (int z = 0; z < C.size(); z++) {
+			if (probabilities[i] == m_P[z]) { // prob - исходный порядо букв в массиве,  m_P - отсортированный
+				if (order[z] == -1) {
+					order[z] = alphabet[i]; //создаем текущий порядок букв
+					std::cout << alphabet[i] << " - ";
+					for (int j = 0; j < C[z].size(); j++) {
+						 std::cout << C[z][j];
+					}
+					 std::cout << "\n";
 
 
-	// 				coding_price += (m_P[z] * len[z]);
-	// 				P.push_back(m_P[z]);
-	// 				break;
-	// 			}
-	// 		}
-	// 	}
-	// }
-	// std::cout << "\n";
-	// std::cout << "Цена кодирования - " << coding_price << endl;
-	// C_rectangular = transform_to_rectangle(C);
-	// int numRows = C_rectangular.size();
- //        int numCols = C_rectangular[0].size();
-	// for (const auto& row : C_rectangular) {
- //        for (int val : row) {
- //            std::cout << val << ' ';
- //        }
- //        std::cout << '\n';
- //    	}	
- //    	std::cout << std::endl;
+					coding_price += (m_P[z] * len[z]);
+					P.push_back(m_P[z]);
+					break;
+				}
+			}
+		}
+	}
+	std::cout << "\n";
+	std::cout << "Цена кодирования - " << coding_price << endl;
+	C_rectangular = transform_to_rectangle(C);
+	int numRows = C_rectangular.size();
+        int numCols = C_rectangular[0].size();
+	for (const auto& row : C_rectangular) {
+        for (int val : row) {
+            std::cout << val << ' ';
+        }
+        std::cout << '\n';
+    	}	
+    	std::cout << std::endl;
 
 	// // for (int i = 1; i < world_size; ++i) {
  // //        MPI_Send(&numRows, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
