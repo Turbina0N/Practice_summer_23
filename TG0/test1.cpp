@@ -192,9 +192,9 @@ std::string CodingHuffman(const std::string& s_input, const std::string& s_outpu
         }
     }
 
-    // Запись результата в файл
-    std::ofstream output(s_output + "_part_" + std::to_string(rank)); // каждый процесс создает свой файл
-    output << result;
+    // // Запись результата в файл
+    // std::ofstream output(s_output + "_part_" + std::to_string(rank)); // каждый процесс создает свой файл
+    // output << result;
 
     return result;
 }
@@ -388,6 +388,11 @@ int main(int argc, char** argv) {
 	}
 	std::cout << "\n";
 	std::cout << "Цена кодирования - " << coding_price << endl;
+	std::cout << "Вектор - " << endl;
+	for (int val : order) {
+            std::cout << val << ' ';
+        }
+        std::cout << '\n';   
 	C_rectangular = transform_to_rectangle(C);
 	int numRows = C_rectangular.size();
         int numCols = C_rectangular[0].size();
@@ -511,54 +516,3 @@ int main(int argc, char** argv) {
     MPI_Finalize();
     return 0;
 }
-
-
-// int main(int argc, char** argv) {
-//     MPI_Init(&argc, &argv);
-
-//     int world_rank;
-//     MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
-
-//     int world_size;
-//     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-
-//      std::vector<char> alphabet = { 'q', 'w', 'e', 'r', 't', 'y', ' ', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '@', '.' };
-//     std::cout <<alphabet.size();
-//     if (alphabet.empty()) {
-//         MPI_Finalize();
-//         return 1;
-//     }
-
-//     std::vector<char> symbols = CreateFile(alphabet, world_rank, world_size);
-
-//     std::cout << "Process " << world_rank << " of " << world_size << " is executing.\n";
-
-//     if (world_rank == 0) {
-//         for (int i = 1; i < world_size; ++i) {
-//             int count;
-//             MPI_Status status;
-
-//             MPI_Probe(i, 0, MPI_COMM_WORLD, &status);
-//             MPI_Get_count(&status, MPI_CHAR, &count);
-
-//             std::vector<char> other_symbols(count);
-//             MPI_Recv(other_symbols.data(), count, MPI_CHAR, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-
-//             symbols.insert(symbols.end(), other_symbols.begin(), other_symbols.end());
-
-//             std::cout << "Process 0 received message from process " << i << "\n";
-//         }
-
-//         std::ofstream file("symbols.txt");
-//         for (char symbol : symbols) {
-//             file << symbol;
-//         }
-//     } else {
-//         MPI_Send(symbols.data(), symbols.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD);
-//         std::cout << "Process " << world_rank << " sent message to process 0\n";
-//     }
-
-//     MPI_Finalize();
-//     return 0;
-// }
-
