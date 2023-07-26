@@ -440,7 +440,15 @@ int main(int argc, char** argv) {
     }
 	
 //CodingRLE_MPI("Library.txt", "CodingRLE.txt");
-
+//Coding RLE
+string file_RLE = readFile("Library.txt");
+int total_symbols = file_RLE.size();
+int base_process = total_symbols / world_size;
+int remainder = total_symbols % world_size;
+int start_symbol = world_rank * base_process + std::min(world_rank, remainder);
+int symbols_per_process = base_process + (world_rank < remainder ? 1 : 0);
+string chunk = file_RLE.substr(start_symbol, symbols_per_process);
+std::cout<<world_rank << ":   " << chunk << std::endl;
  if (world_rank == 0) {
 	 
  }
