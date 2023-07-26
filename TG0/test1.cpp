@@ -301,7 +301,6 @@ int rank, world_size;
     int start_symbol = rank * base_process + std::min(rank, remainder);
     int symbols_per_process = base_process + (rank < remainder ? 1 : 0);
     int end_symbol = start_symbol + symbols_per_process;
-    std::string file_content = readFile(s_input);
 
     std::string result;
     std::vector<int> code;
