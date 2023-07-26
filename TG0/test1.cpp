@@ -247,51 +247,27 @@ void CodingRLE_MPI(string s_input, string s_output) {
     MPI_Finalize();
 }
 
-std::string CodingHuffman(const std::string& s_input, const std::string& s_output, const std::vector<std::vector<int>>& C) {
-    int rank, world_size;
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-
-    // Все процессы сначала читают весь файл
-    std::string file_content = readFile(s_input);
-    int total_symbols = file_content.size();
-
-    int base_process = total_symbols / world_size;
-    int remainder = total_symbols % world_size;
-
-    // Определение начала и конца обработки каждого процесса
-    int start_symbol = rank * base_process + std::min(rank, remainder);
-    int symbols_per_process = base_process + (rank < remainder ? 1 : 0);
-    int end_symbol = start_symbol + symbols_per_process;
-
-    std::string result;
-    for (int n = start_symbol; n < end_symbol; ++n) {
-        for (int i = 0; i < C.size(); ++i) {
-            if (file_content[n] == order[i]) {
-                for (int j = 0; j < C[i].size(); ++j) {
-                    if (C[i][j] != -1) {
-                        result += std::to_string(C[i][j]);
-                    }
-                }
-            }
-        }
-    }
-
-    // Запись результата в файл
-    std::ofstream output(s_output + "_part_" + std::to_string(rank)); // каждый процесс создает свой файл
-    output << result;
-
-    return result;
-}
-
-// std::string CodingHuffman(const std::string& s_output, const std::vector<std::vector<int>>& C, const std::string& substring) {
-//     int rank;
+// std::string CodingHuffman(const std::string& s_input, const std::string& s_output, const std::vector<std::vector<int>>& C) {
+//     int rank, world_size;
 //     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+//     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+
+//     // Все процессы сначала читают весь файл
+//     std::string file_content = readFile(s_input);
+//     int total_symbols = file_content.size();
+
+//     int base_process = total_symbols / world_size;
+//     int remainder = total_symbols % world_size;
+
+//     // Определение начала и конца обработки каждого процесса
+//     int start_symbol = rank * base_process + std::min(rank, remainder);
+//     int symbols_per_process = base_process + (rank < remainder ? 1 : 0);
+//     int end_symbol = start_symbol + symbols_per_process;
 
 //     std::string result;
-//     for (char symbol : substring) {
+//     for (int n = start_symbol; n < end_symbol; ++n) {
 //         for (int i = 0; i < C.size(); ++i) {
-//             if (symbol == order[i]) {
+//             if (file_content[n] == order[i]) {
 //                 for (int j = 0; j < C[i].size(); ++j) {
 //                     if (C[i][j] != -1) {
 //                         result += std::to_string(C[i][j]);
@@ -307,6 +283,30 @@ std::string CodingHuffman(const std::string& s_input, const std::string& s_outpu
 
 //     return result;
 // }
+
+std::string CodingHuffman(const std::string& s_output, const std::vector<std::vector<int>>& C, const std::string& substring) {
+    int rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+    std::string result;
+    for (char symbol : substring) {
+        for (int i = 0; i < C.size(); ++i) {
+            if (symbol == order[i]) {
+                for (int j = 0; j < C[i].size(); ++j) {
+                    if (C[i][j] != -1) {
+                        result += std::to_string(C[i][j]);
+                    }
+                }
+            }
+        }
+    }
+
+    // Запись результата в файл
+    std::ofstream output(s_output + "_part_" + std::to_string(rank)); // каждый процесс создает свой файл
+    output << result;
+
+    return result;
+}
 
 
 
@@ -534,29 +534,33 @@ int main(int argc, char** argv) {
 
 	
 MPI_Barrier(MPI_COMM_WORLD);
-std::string file_content;
+std::vector<char> file_content;
     if (world_rank == 0) {
-        // В процессе с рангом 0 считываем весь файл
         file_content = readFile("Library.txt");
     }
 
     int total_symbols = file_content.size();
+
+    // Рассылаем total_symbols всем узлам
+    MPI_Bcast(&total_symbols, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+    // Теперь рассылаем содержимое файла всем узлам
+    file_content.resize(total_symbols);
+    MPI_Bcast(file_content.data(), total_symbols, MPI_CHAR, 0, MPI_COMM_WORLD);
+
     int base_process = total_symbols / world_size;
     int remainder = total_symbols % world_size;
 
     // Определение начала и конца обработки каждого процесса
     int start_symbol = world_rank * base_process + std::min(world_rank, remainder);
     int symbols_per_process = base_process + (world_rank < remainder ? 1 : 0);
-    int end_symbol = start_symbol + symbols_per_process;
 
     // Субстрока для этого процесса
-    std::string substring = file_content.substr(start_symbol, symbols_per_process);
+    std::string substring(file_content.begin() + start_symbol, file_content.begin() + start_symbol + symbols_per_process);
 
-    // Вызов функции CodingHuffman с субстрокой
-    std::string result = CodingHuffman("Coding", C_rectangular, substring);
-    
- if (world_rank == 0) {
-        // Принимаем закодированные строки от всех остальных узлов и записываем их в файл
+    // Здесь ваш код для создания C_rectangular
+
+    if (world_rank == 0) {
         std::string encoded = CodingHuffman("Coding", C_rectangular, substring);
         for (int i = 1; i < world_size; ++i) {
             MPI_Status status;
@@ -574,11 +578,11 @@ std::string file_content;
 
         std::ofstream output("Coding.txt");
         output << encoded;
- }
-else {
-     std::string encoded = CodingHuffman("Coding", C_rectangular, substring);
-     MPI_Send(encoded.data(), encoded.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD);
-}
+    }
+    else {
+        std::string encoded = CodingHuffman("Coding", C_rectangular, substring);
+        MPI_Send(encoded.data(), encoded.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD);
+    }
 	
 	
 //CodingRLE_MPI("Library.txt", "CodingRLE.txt");
