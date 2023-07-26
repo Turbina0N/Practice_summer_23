@@ -312,11 +312,13 @@ int main(int argc, char** argv) {
     }
 
     std::vector<char> symbols = CreateFile(alphabet, world_rank, world_size);
+	
  //    std::cout <<"rank = "<< world_rank << "\t"<<std::endl;
  //    for (auto c: symbols){
 	//     std::cout << c;
  //    }
 	// std::cout<<std::endl;
+	
     int numRows = 0;
     int numCols = 0;
     std::vector<std::vector<int>> C_rectangular;
@@ -422,10 +424,10 @@ int main(int argc, char** argv) {
 
  //            std::string received_str(received_data.begin(), received_data.end());
  //            encoded += received_str;
-        }
+        // }
 
-        std::ofstream output("Coding.txt");
-        output << encoded;
+        // std::ofstream output("Coding.txt");
+        // output << encoded;
     }
     else {
         MPI_Send(symbols.data(), symbols.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD);
