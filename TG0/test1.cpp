@@ -151,11 +151,15 @@ std::vector<std::vector<int>> transform_to_rectangle(const std::vector<std::vect
     return C_rectangular;
 }
 // Вспомогательная функция для чтения файла в строку
-std::string readFile(const std::string& filename) {
-    std::ifstream file(filename);
-    std::stringstream buffer;
-    buffer << file.rdbuf();
-    return buffer.str();
+std::string readFile(const std::string& fileName) {
+    std::ifstream ifs(fileName.c_str(), std::ios::in | std::ios::binary | std::ios::ate);
+    std::ifstream::pos_type fileSize = ifs.tellg();
+    ifs.seekg(0, std::ios::beg);
+
+    std::vector<char> bytes(fileSize);
+    ifs.read(&bytes[0], fileSize);
+
+    return std::string(&bytes[0], fileSize);
 }
 
 std::string CodingHuffman(const std::string& s_input, const std::string& s_output, const std::vector<std::vector<int>>& C) {
@@ -442,12 +446,12 @@ int main(int argc, char** argv) {
 //CodingRLE_MPI("Library.txt", "CodingRLE.txt");
 //Coding RLE
 {
-    std::string file_RLE;
+     std::string file_RLE;
     if (world_rank == 0) {
         file_RLE = readFile("Library.txt");
     }
-    int base_process;
-    int remainder;
+
+    int base_process, remainder;
     if (world_rank == 0) {
         int total_symbols = file_RLE.size();
         base_process = total_symbols / world_size;
@@ -459,17 +463,26 @@ int main(int argc, char** argv) {
 
     int start_symbol = world_rank * base_process + std::min(world_rank, remainder);
     int symbols_per_process = base_process + (world_rank < remainder ? 1 : 0);
+
     std::vector<char> chunk(symbols_per_process);
-    
+
     if (world_rank == 0) {
         chunk.assign(file_RLE.begin() + start_symbol, file_RLE.begin() + start_symbol + symbols_per_process);
         for (int i = 1; i < world_size; i++) {
             int start_symbol_i = i * base_process + std::min(i, remainder);
             int symbols_per_process_i = base_process + (i < remainder ? 1 : 0);
-            MPI_Send(file_RLE.data() + start_symbol_i, symbols_per_process_i, MPI_CHAR, i, 0, MPI_COMM_WORLD);
+            MPI_Status status;
+            if (MPI_Send(file_RLE.data() + start_symbol_i, symbols_per_process_i, MPI_CHAR, i, 0, MPI_COMM_WORLD) != MPI_SUCCESS) {
+                MPI_Error_string(status.MPI_ERROR, err_string, &len);
+                printf("MPI_Send failed with error code %d\n", status.MPI_ERROR);
+            }
         }
     } else {
-        MPI_Recv(chunk.data(), chunk.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        MPI_Status status;
+        if (MPI_Recv(chunk.data(), chunk.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD, &status) != MPI_SUCCESS) {
+            MPI_Error_string(status.MPI_ERROR, err_string, &len);
+            printf("MPI_Recv failed with error code %d\n", status.MPI_ERROR);
+        }
     }
 
     std::cout << world_rank << ":   " << std::string(chunk.begin(), chunk.end()) << std::endl;
