@@ -195,6 +195,106 @@ std::string CodingHuffman(const std::string& s_input, const std::string& s_outpu
     return result;
 }
 
+string readFile(const string& filename) {
+    ifstream file(filename);
+    stringstream buffer;
+    buffer << file.rdbuf();
+    return buffer.str();
+}
+
+std::string CodingRLE(std::string chunk) {
+    std::string result;
+    int count = 1;
+    for (int i = 1; i < chunk.size(); i++) {
+        if (chunk[i] == chunk[i - 1]) {
+            count++;
+        } else {
+            if (chunk[i - 1] == '0') result += 'q';
+            else if (chunk[i - 1] == '1') result += 'w';
+            else if (chunk[i - 1] == '2') result += 'e';
+            else if (chunk[i - 1] == '3') result += 'r';
+            else if (chunk[i - 1] == '4') result += 't';
+            else if (chunk[i - 1] == '5') result += 'y';
+            else if (chunk[i - 1] == '6') result += 'u';
+            else if (chunk[i - 1] == '7') result += 'i';
+            else if (chunk[i - 1] == '8') result += 'o';
+            else if (chunk[i - 1] == '9') result += 'p';
+            else if (chunk[i - 1] == ' ') result += 'x';
+            else result += chunk[i - 1];
+            result += std::to_string(count);
+            count = 1;
+        }
+        // Если текущий символ является последним в строке, то добавляем его и количество в результат
+        if (i == chunk.size() - 1) {
+            if (chunk[i] == '0') result += 'q';
+            else if (chunk[i] == '1') result += 'w';
+            else if (chunk[i] == '2') result += 'e';
+            else if (chunk[i] == '3') result += 'r';
+            else if (chunk[i] == '4') result += 't';
+            else if (chunk[i] == '5') result += 'y';
+            else if (chunk[i] == '6') result += 'u';
+            else if (chunk[i] == '7') result += 'i';
+            else if (chunk[i] == '8') result += 'o';
+            else if (chunk[i] == '9') result += 'p';
+            else if (chunk[i] == ' ') result += 'x';
+            else result += chunk[i];
+            result += std::to_string(count);
+        }
+    }
+    return result;
+}
+
+void CodingRLE_MPI(string s_input, string s_output) {
+    MPI_Init(NULL, NULL);
+
+    int world_size;
+    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+
+    int world_rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+
+    string file_content = readFile(s_input);
+
+    int total_symbols = file_content.size();
+    int base_process = total_symbols / world_size;
+    int remainder = total_symbols % world_size;
+    int start_symbol = world_rank * base_process + std::min(world_rank, remainder);
+    int symbols_per_process = base_process + (world_rank < remainder ? 1 : 0);
+
+    string chunk = file_content.substr(start_symbol, symbols_per_process);
+    string result = CodingRLE(chunk);
+
+    if (world_rank == 0) {
+        ofstream output(s_output);
+        output << result;
+        for (int i = 1; i < world_size; i++) {
+            int recv_size;
+            MPI_Recv(&recv_size, 1, MPI_INT, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            char* recv_result = new char[recv_size];
+            MPI_Recv(recv_result, recv_size, MPI_CHAR, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            output << recv_result;
+            delete[] recv_result;
+        }
+        output.close();
+    } else {
+        int send_size = result.size() + 1;
+        MPI_Send(&send_size, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
+        const char *send_result = result.c_str();
+        MPI_Send(send_result, send_size, MPI_CHAR, 0, 0, MPI_COMM_WORLD);
+    }
+
+    MPI_Finalize();
+}
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -345,7 +445,8 @@ int main(int argc, char** argv) {
  //     //std::string encoded = CodingHuffman("Library.txt", "Coding", C_rectangular);
  //     //MPI_Send(encoded.data(), encoded.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD);
     }
-
+	
+CodingRLE_MPI("Library.txt", "CodingRLE.txt");
 
  if (world_rank == 0) {
 	 
