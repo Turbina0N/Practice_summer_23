@@ -286,7 +286,7 @@ std::string CodingHuffman(const std::string& s_input, const std::string& s_outpu
 
 std::string DecodingHuffman(const std::string& s_input, const std::string& s_output, 
                             const std::vector<std::vector<int>>& C, int& k) {
-int rank, world_size;
+    int rank, world_size;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
@@ -311,7 +311,9 @@ int rank, world_size;
         else if (file_content[n] == '1') code.push_back(1);
 
         for (int i = 0; i < C.size(); i++) {
-            if (code == C[i]) {
+            std::vector<int> temp = C[i];
+            temp.erase(std::remove(temp.begin(), temp.end(), -1), temp.end()); // Удаляем все -1 из temp
+            if (code == temp) {
                 code.clear();
                 result += order[i];  
                 break;
