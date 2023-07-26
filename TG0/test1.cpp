@@ -507,28 +507,7 @@ int main(int argc, char** argv) {
         std::ofstream output("Coding.txt");
         output << encoded;
         //MPI_Barrier(MPI_COMM_WORLD);
-	std::string result1 = DecodingHuffman("Coding", "Decoding", C_rectangular, k1);
-	std::vector<std::string> results(world_size);
-	results[0] = result1;
-        for (int i = 1; i < world_size; i++) {
-            MPI_Status status;
-            int result_size;
-            MPI_Recv(&result_size, 1, MPI_INT, i, 0, MPI_COMM_WORLD, &status);
-            char* buf = new char[result_size + 1];
-            MPI_Recv(buf, result_size, MPI_CHAR, i, 0, MPI_COMM_WORLD, &status);
-            buf[result_size] = '\0';
-            results[i] = std::string(buf);
-            delete[] buf;
-	}
-	// Объединяем результаты и записываем их в один файл
-        std::string combined_result_dec1;
-        for (const auto& res : results) {
-             combined_result_dec1 += res;
-        }
-
-        std::ofstream output_file("Decoding.txt");
-        output_file <<  combined_result_dec1;
-        output_file.close();
+	
 	
     }
     else {
@@ -559,16 +538,7 @@ int main(int argc, char** argv) {
      std::string encoded = CodingHuffman("Library.txt", "Coding", C_rectangular);
      MPI_Send(encoded.data(), encoded.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD);
      //MPI_Barrier(MPI_COMM_WORLD);
-	    
-	std::string result1 = DecodingHuffman("Coding", "Decoding", C_rectangular, k1);
-	int result_size = result1.size();
-        MPI_Send(&result_size, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
-        MPI_Send(result1.c_str(), result_size, MPI_CHAR, 0, 0, MPI_COMM_WORLD);
-	std::cout << result1.size() ;
     }
-
-
-std::string result_2 = DecodingHuffman2("Coding.txt", "Decoding.txt", C_rectangular, k1);
 	
 	
 //CodingRLE_MPI("Library.txt", "CodingRLE.txt");
@@ -619,12 +589,37 @@ std::string result_2 = DecodingHuffman2("Coding.txt", "Decoding.txt", C_rectangu
 
 //     std::cout << world_rank << ":   " << std::string(chunk.begin(), chunk.end()) <<"\n\n" << std::endl;
 // }
-	
+MPI_Barrier(MPI_COMM_WORLD);
  if (world_rank == 0) {
-	
+	std::string result1 = DecodingHuffman("Coding", "Decoding", C_rectangular, k1);
+	std::vector<std::string> results(world_size);
+	results[0] = result1;
+        for (int i = 1; i < world_size; i++) {
+            MPI_Status status;
+            int result_size;
+            MPI_Recv(&result_size, 1, MPI_INT, i, 0, MPI_COMM_WORLD, &status);
+            char* buf = new char[result_size + 1];
+            MPI_Recv(buf, result_size, MPI_CHAR, i, 0, MPI_COMM_WORLD, &status);
+            buf[result_size] = '\0';
+            results[i] = std::string(buf);
+            delete[] buf;
+	}
+	// Объединяем результаты и записываем их в один файл
+        std::string combined_result_dec1;
+        for (const auto& res : results) {
+             combined_result_dec1 += res;
+        }
+
+        std::ofstream output_file("Decoding.txt");
+        output_file <<  combined_result_dec1;
+        output_file.close();
  }
 else {
-	
+	std::string result1 = DecodingHuffman("Coding", "Decoding", C_rectangular, k1);
+	int result_size = result1.size();
+        MPI_Send(&result_size, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
+        MPI_Send(result1.c_str(), result_size, MPI_CHAR, 0, 0, MPI_COMM_WORLD);
+	std::cout << result1.size() ;
 }
 
     MPI_Finalize();
