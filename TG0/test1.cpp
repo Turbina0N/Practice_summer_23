@@ -205,48 +205,6 @@ std::string CodingRLE(std::string chunk) {
     return result;
 }
 
-void CodingRLE_MPI(string s_input, string s_output) {
-    MPI_Init(NULL, NULL);
-
-    int world_size;
-    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-
-    int world_rank;
-    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
-
-    string file_content = readFile(s_input);
-
-    int total_symbols = file_content.size();
-    int base_process = total_symbols / world_size;
-    int remainder = total_symbols % world_size;
-    int start_symbol = world_rank * base_process + std::min(world_rank, remainder);
-    int symbols_per_process = base_process + (world_rank < remainder ? 1 : 0);
-
-    string chunk = file_content.substr(start_symbol, symbols_per_process);
-    string result = CodingRLE(chunk);
-
-    if (world_rank == 0) {
-        ofstream output(s_output);
-        output << result;
-        for (int i = 1; i < world_size; i++) {
-            int recv_size;
-            MPI_Recv(&recv_size, 1, MPI_INT, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            char* recv_result = new char[recv_size];
-            MPI_Recv(recv_result, recv_size, MPI_CHAR, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            output << recv_result;
-            delete[] recv_result;
-        }
-        output.close();
-    } else {
-        int send_size = result.size() + 1;
-        MPI_Send(&send_size, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
-        const char *send_result = result.c_str();
-        MPI_Send(send_result, send_size, MPI_CHAR, 0, 0, MPI_COMM_WORLD);
-    }
-
-    MPI_Finalize();
-}
-
 std::string CodingHuffman(const std::string& s_output, const std::vector<std::vector<int>>& C, const std::string& substring) {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -568,6 +526,31 @@ if (world_rank == 0) {
 	bool flag1 = Check("Library.txt", "Decoding.txt");
 	cout << "CheckHuffman:  " << flag1 << endl;
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////
+if (world_rank == 0) {
+	std::string encoded = CodingRLE(substring);
+	std::ofstream output("Coding.txt");
+        output << encoded;
+	for (int i = 1; i < world_size; ++i) {
+            MPI_Status status;
+            MPI_Probe(i, 0, MPI_COMM_WORLD, &status);
+
+            int size;
+            MPI_Get_count(&status, MPI_CHAR, &size);
+
+            std::vector<char> received_data(size);
+            MPI_Recv(received_data.data(), size, MPI_CHAR, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+            std::string received_str(received_data.begin(), received_data.end());
+            output << received_str;
+        }
+}
+else{
+	std::string encoded = CodingRLE(substring);
+	MPI_Send(encoded.data(), encoded.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD);
+}
+	
 	//CodingRLE_MPI("Library.txt", "CodingRLE.txt");
 //Coding RLE
 // {
@@ -616,6 +599,7 @@ if (world_rank == 0) {
 
 //     std::cout << world_rank << ":   " << std::string(chunk.begin(), chunk.end()) <<"\n\n" << std::endl;
 // }
+	
     MPI_Finalize();
     return 0;
 }
