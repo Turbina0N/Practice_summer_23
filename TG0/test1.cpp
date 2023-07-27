@@ -563,6 +563,7 @@ int main(int argc, char** argv) {
 MPI_Barrier(MPI_COMM_WORLD);
 	
 std::string substring = division_into_parts("Library.txt");
+std::cout <<world_rank << ":\t" << substring <<std::endl;
     if (world_rank == 0) {
         std::string encoded = CodingHuffman("Coding", C_rectangular, substring);
         for (int i = 1; i < world_size; ++i) {
