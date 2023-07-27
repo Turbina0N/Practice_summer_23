@@ -412,7 +412,22 @@ void DecodingRLE_MPI(const std::string& input_filename, const std::string& outpu
 }
 
 
+string Twice1(int& k) {
+	 int world_rank, world_size;
+    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
+	std::string substring = division_into_parts("Coding.txt");
+	CodingRLE_MPI("ResultCodingTwice1", substring, world_rank, world_size);
+	ifstream input("ResultCodingTwice1.txt");
+	string str;
+	int num = 0;
+	while (getline(input, str)) {
+		num += str.size();
+	}
+	k = num;
+	return strRLE;
+}
 
 
 
@@ -563,7 +578,7 @@ int main(int argc, char** argv) {
 MPI_Barrier(MPI_COMM_WORLD);
 	
 std::string substring = division_into_parts("Library.txt");
-std::cout <<world_rank << ":\t" << substring <<std::endl;
+//std::cout <<world_rank << ":\t" << substring <<std::endl;
     if (world_rank == 0) {
         std::string encoded = CodingHuffman("Coding", C_rectangular, substring);
         for (int i = 1; i < world_size; ++i) {
@@ -629,34 +644,7 @@ if (world_rank == 0) {
 CodingRLE_MPI("CodingRLE", substring, world_rank, world_size);
 /////////////////////////////////////////////////////////////////////////////////////////////// DecodingRLE
 DecodingRLE_MPI("CodingRLE","DecodingRLE",world_rank,world_size,k2);
-    // std::cout << std::endl;
-    // std::string encodedRLE;
-    // {
-    //     std::ifstream input("CodingRLE_part_" + std::to_string(world_rank) + ".txt");
-    //     std::stringstream ss;
-    //     ss << input.rdbuf();
-    //     encodedRLE = ss.str();
-    // }
-    // std::string decodedRLE = DecodingRLE(encodedRLE,k2);
-    // if (world_rank == 0) {
-    //     std::ofstream output("DecodingRLE.txt");
-    //     output << decodedRLE;
-    //     for (int i = 1; i < world_size; ++i) {
-    //         MPI_Status status;
-    //         MPI_Probe(i, 0, MPI_COMM_WORLD, &status);
 
-    //         int size;
-    //         MPI_Get_count(&status, MPI_CHAR, &size);
-
-    //         std::vector<char> received_data(size);
-    //         MPI_Recv(received_data.data(), size, MPI_CHAR, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-
-    //         std::string received_str(received_data.begin(), received_data.end());
-    //         output << received_str;
-    //     }
-    // } else {
-    //     MPI_Send(decodedRLE.data(), decodedRLE.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD);
-    // }
 
   if (world_rank == 0) {
 	bool flag2 = Check("Library.txt", "DecodingRLE.txt");
@@ -664,6 +652,14 @@ DecodingRLE_MPI("CodingRLE","DecodingRLE",world_rank,world_size,k2);
 	std::cout << "Сompression ratio RLE: " << 10000. / k2 << std::endl;
 	std::cout << "Сompression ratio : " << 10000. / k1 << std::endl;
   }
+
+
+string v1 = Twice1(k3);
+//string v2 = Twice2(k4, C_rectangular);
+ if (world_rank == 0) {
+	cout << "Сompression ratio : " << 10000. / k3 << endl;
+	cout << "Сompression ratio : " << 10000. / k4 << endl;
+ }
     MPI_Finalize();
     return 0;
 }
