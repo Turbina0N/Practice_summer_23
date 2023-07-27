@@ -343,7 +343,7 @@ void CodingRLE_MPI(const std::string& filename, const std::string& substring, in
     if (world_rank == 0) {
 	std::cout << std::endl;
         std::string encoded = CodingRLE(substring);
-        std::ofstream output(filename);
+        std::ofstream output(filename + ".txt");
         output << encoded;
         std::ofstream output1(filename + "_part_" + std::to_string(world_rank) + ".txt");
         output1 << encoded;
