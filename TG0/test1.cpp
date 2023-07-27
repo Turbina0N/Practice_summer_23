@@ -205,6 +205,31 @@ std::string CodingRLE(std::string chunk) {
     return result;
 }
 
+std::string DecodingRLE(const std::string& input_string, int& k) {
+    k = input_string.size();
+    std::string result;
+    char symbol;
+    int count;
+    std::istringstream is(input_string);
+    while (is >> symbol >> count) {
+        for (int i = 0; i < count; i++) {
+            if (symbol == 'q') result += '0';
+            else if (symbol == 'w') result += '1';
+            else if (symbol == 'e') result += '2';
+            else if (symbol == 'r') result += '3';
+            else if (symbol == 't') result += '4';
+            else if (symbol == 'y') result += '5';
+            else if (symbol == 'u') result += '6';
+            else if (symbol == 'i') result += '7';
+            else if (symbol == 'o') result += '8';
+            else if (symbol == 'p') result += '9';
+            else if (symbol == 'x') result += ' ';
+            else result += symbol;
+        }
+    }
+    return result;
+}
+
 std::string CodingHuffman(const std::string& s_output, const std::vector<std::vector<int>>& C, const std::string& substring) {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -257,8 +282,6 @@ std::string DecodingHuffman(const std::string& s_input, const std::string& s_out
             }
         }
     }
-
-    // Запись результата в файл
     std::ofstream output(s_output + "_part_" + std::to_string(rank)); // каждый процесс создает свой файл
     output << result;
 
@@ -527,7 +550,7 @@ if (world_rank == 0) {
 	cout << "CheckHuffman:  " << flag1 << endl;
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////// CodingRLE
 if (world_rank == 0) {
 	std::string encoded = CodingRLE(substring);
 	std::ofstream output("CodingRLE.txt");
@@ -554,7 +577,56 @@ else{
 	std::ofstream output1("CodingRLE_part_" + std::to_string(world_rank) + ".txt");
         output1 << encoded;
 }
-	
+
+/////////////////////////////////////////////////////////////////////////////////////////////// DecodingRLE
+    std::string encodedRLE;
+    {
+        std::ifstream input("CodingRLE_part_" + std::to_string(world_rank) + ".txt");
+        std::stringstream ss;
+        ss << input.rdbuf();
+        encodedRLE = ss.str();
+    }
+    std::string decodedRLE = DecodingRLE(encodedRLE,k2);
+    if (world_rank == 0) {
+        std::ofstream output("DecodingRLE.txt");
+        output << decodedRLE;
+        for (int i = 1; i < world_size; ++i) {
+            MPI_Status status;
+            MPI_Probe(i, 0, MPI_COMM_WORLD, &status);
+
+            int size;
+            MPI_Get_count(&status, MPI_CHAR, &size);
+
+            std::vector<char> received_data(size);
+            MPI_Recv(received_data.data(), size, MPI_CHAR, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+            std::string received_str(received_data.begin(), received_data.end());
+            output << received_str;
+        }
+    } else {
+        MPI_Send(decodedRLE.data(), decodedRLE.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD);
+    }
+	bool flag2 = Check("Library.txt", "DecodingRLE.txt" );
+	std::cout << "CheckRLE:  " << flag2 << std::endl;
+	std::cout << "Сompression ratio RLE: " << 10000. / k2 << std::endl;
+	std::cout << "Сompression ratio : " << 10000. / k1 << std::endl;
     MPI_Finalize();
     return 0;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
