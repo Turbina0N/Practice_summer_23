@@ -340,9 +340,8 @@ std::string division_into_parts(const std::string& filename) {
 }
 
 void CodingRLE_MPI(const std::string& filename, const std::string& substring, int world_rank, int world_size) {
-    std::cout << std::endl;
-
     if (world_rank == 0) {
+	std::cout << std::endl;
         std::string encoded = CodingRLE(substring);
         std::ofstream output(filename);
         output << encoded;
@@ -584,7 +583,7 @@ if (world_rank == 0) {
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////// CodingRLE
-CodingRLE_MPI("CodingRLE.txt", substring, world_rank, world_size);
+CodingRLE_MPI("CodingRLE", substring, world_rank, world_size);
 /////////////////////////////////////////////////////////////////////////////////////////////// DecodingRLE
     std::cout << std::endl;
     std::string encodedRLE;
