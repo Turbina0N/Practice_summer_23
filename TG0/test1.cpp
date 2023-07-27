@@ -393,7 +393,7 @@ void DecodingRLE_MPI(const std::string& input_filename, const std::string& outpu
             results[i] = std::string(buf);
             delete[] buf;
         }
-        // Combine the results and write them into one file
+
         std::string combined_result;
         for (const auto& res : results) {
             combined_result += res;
@@ -408,6 +408,7 @@ void DecodingRLE_MPI(const std::string& input_filename, const std::string& outpu
         MPI_Send(decodedRLE.c_str(), result_size, MPI_CHAR, 0, 0, MPI_COMM_WORLD);
     }
 }
+
 
 
 
@@ -614,7 +615,6 @@ else {
 	int result_size = result1.size();
         MPI_Send(&result_size, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
         MPI_Send(result1.c_str(), result_size, MPI_CHAR, 0, 0, MPI_COMM_WORLD);
-	std::cout << result1.size() ;
 }
 
 if (world_rank == 0) {
@@ -656,7 +656,7 @@ DecodingRLE_MPI("CodingRLE","DecodingRLE",world_rank,world_size,k2);
     // }
 
   if (world_rank == 0) {
-	bool flag2 = Check("Library.txt", "DecodingRLE.txt" );
+	bool flag2 = Check("Library.txt", "DecodingRLE.txt");
 	std::cout << "CheckRLE:  " << flag2 << std::endl;
 	std::cout << "Сompression ratio RLE: " << 10000. / k2 << std::endl;
 	std::cout << "Сompression ratio : " << 10000. / k1 << std::endl;
