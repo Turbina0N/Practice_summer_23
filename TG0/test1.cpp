@@ -397,7 +397,7 @@ std::string division_into_parts(const std::string& filename) {
 //         MPI_Send(result.data(), result.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD);
 //     }
 // }
-void CodingHuffmanNew_MPI(const std::string& substring, const std::string& s_output, const std::vector<std::vector<int>>& C, int world_rank, int world_size) {
+void CodingHuffmanNew(const std::string& substring, const std::string& s_output, const std::vector<std::vector<int>>& C, int world_rank, int world_size) {
     static std::vector<char> orderNew(19, -1);
     if(world_rank == 0){
         for (int i = 0; i < 19; i++) {
