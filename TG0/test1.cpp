@@ -378,7 +378,9 @@ void DecodingRLE_MPI(const std::string& input_filename, const std::string& outpu
         encodedRLE = ss.str();
     }
     std::string decodedRLE = DecodingRLE(encodedRLE, k2);
-
+    std::ofstream output_part(output_filename + "_part_" + std::to_string(world_rank) + ".txt");
+    output_part << decodedRLE;
+    output_part.close();
     if (world_rank == 0) {
         std::vector<std::string> results(world_size);
         results[0] = decodedRLE;
