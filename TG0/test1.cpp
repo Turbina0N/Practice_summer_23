@@ -345,7 +345,7 @@ void CodingRLE_MPI(const std::string& filename, const std::string& substring, in
         std::string encoded = CodingRLE(substring);
         std::ofstream output(filename + ".txt");
         output << encoded;
-        std::ofstream output1(filename + "_part_" + std::to_string(world_rank) + ".txt");
+        std::ofstream output1(filename + "_part_" + std::to_string(world_rank));
         output1 << encoded;
         for (int i = 1; i < world_size; ++i) {
             MPI_Status status;
@@ -363,7 +363,7 @@ void CodingRLE_MPI(const std::string& filename, const std::string& substring, in
     } else {
         std::string encoded = CodingRLE(substring);
         MPI_Send(encoded.data(), encoded.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD);
-        std::ofstream output1(filename + "_part_" + std::to_string(world_rank) + ".txt");
+        std::ofstream output1(filename + "_part_" + std::to_string(world_rank));
         output1 << encoded;
     }
 }
@@ -372,13 +372,13 @@ void DecodingRLE_MPI(const std::string& input_filename, const std::string& outpu
     std::cout << std::endl;
     std::string encodedRLE;
     {
-        std::ifstream input(input_filename + "_part_" + std::to_string(world_rank) + ".txt");
+        std::ifstream input(input_filename + "_part_" + std::to_string(world_rank));
         std::stringstream ss;
         ss << input.rdbuf();
         encodedRLE = ss.str();
     }
     std::string decodedRLE = DecodingRLE(encodedRLE, k2);
-    std::ofstream output_part(output_filename + "_part_" + std::to_string(world_rank) + ".txt");
+    std::ofstream output_part(output_filename + "_part_" + std::to_string(world_rank));
     output_part << decodedRLE;
     output_part.close();
     if (world_rank == 0) {
