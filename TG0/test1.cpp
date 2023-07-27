@@ -411,27 +411,6 @@ void DecodingRLE_MPI(const std::string& input_filename, const std::string& outpu
     }
 }
 
-
-string Twice1(int& k) {
-	 int world_rank, world_size;
-    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
-    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-
-	std::string substring = division_into_parts("Coding.txt");
-	CodingRLE_MPI("ResultCodingTwice1", substring, world_rank, world_size);
-	ifstream input("ResultCodingTwice1.txt");
-	string str;
-	int num = 0;
-	while (getline(input, str)) {
-		num += str.size();
-	}
-	k = num;
-	return strRLE;
-}
-
-
-
-
 int main(int argc, char** argv) {
     MPI_Init(&argc, &argv);
     int world_rank;
@@ -653,10 +632,19 @@ DecodingRLE_MPI("CodingRLE","DecodingRLE",world_rank,world_size,k2);
 	std::cout << "Сompression ratio : " << 10000. / k1 << std::endl;
   }
 
-
-string v1 = Twice1(k3);
+std::string substring1 = division_into_parts("Coding.txt");
+CodingRLE_MPI("ResultCodingTwice1", substring, world_rank, world_size);
+	
 //string v2 = Twice2(k4, C_rectangular);
  if (world_rank == 0) {
+	std::ifstream input("ResultCodingTwice1.txt");
+        std::string str;
+        int num = 0;
+
+        while (getline(input, str)) {
+            num += str.size();
+        }
+        k3 = num;
 	cout << "Сompression ratio : " << 10000. / k3 << endl;
 	cout << "Сompression ratio : " << 10000. / k4 << endl;
  }
