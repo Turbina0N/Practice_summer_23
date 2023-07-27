@@ -339,6 +339,66 @@ std::string division_into_parts(const std::string& filename) {
     return substring;
 }
 
+void CodingHuffmanNew(const std::string& substring, const std::string& s_output, vector<vector<int>> C, int world_rank, int world_size) {
+    std::string orderNew = order; 
+
+    for (int i = 0; i < 19; i++) {
+        if (order[i] == '0') orderNew[i] = 'q';
+        else if (order[i] == '1') orderNew[i] = 'w';
+        else if (order[i] == '2') orderNew[i] = 'e';
+        else if (order[i] == '3') orderNew[i] = 'r';
+        else if (order[i] == '4') orderNew[i] = 't';
+        else if (order[i] == '5') orderNew[i] = 'y';
+        else if (order[i] == '6') orderNew[i] = 'u';
+        else if (order[i] == '7') orderNew[i] = 'i';
+        else if (order[i] == '8') orderNew[i] = 'o';
+        else if (order[i] == '9') orderNew[i] = 'p';
+        else if (order[i] == ' ') orderNew[i] = 'x';
+        else orderNew[i] = order[i];
+    }
+
+    // Процесс кодирования
+    std::string result;
+    for (char c : substring) {
+        for (int i = 0; i < C.size(); i++) {
+            if (c == orderNew[i] || c == order[i]) {
+                for (int j = 0; j < C[i].size(); j++) {
+                    // Пропустить фиктивные символы
+                    if (C[i][j] == -1) {
+                        continue;
+                    }
+                    result += std::to_string(C[i][j]);
+                }
+                break;
+            }
+        }
+    }
+
+    if (world_rank == 0) {
+        std::string encoded = result;
+        for (int i = 1; i < world_size; ++i) {
+            MPI_Status status;
+            MPI_Probe(i, 0, MPI_COMM_WORLD, &status);
+
+            int size;
+            MPI_Get_count(&status, MPI_CHAR, &size);
+
+            std::vector<char> received_data(size);
+            MPI_Recv(received_data.data(), size, MPI_CHAR, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+            std::string received_str(received_data.begin(), received_data.end());
+            encoded += received_str;
+        }
+
+        std::ofstream output(s_output + ".txt");
+        output << encoded;
+    }
+    else {
+        MPI_Send(result.data(), result.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD);
+    }
+}
+
+
 void CodingRLE_MPI(const std::string& filename, const std::string& substring, int world_rank, int world_size) {
     if (world_rank == 0) {
 	std::cout << std::endl;
@@ -634,8 +694,8 @@ DecodingRLE_MPI("CodingRLE","DecodingRLE",world_rank,world_size,k2);
 
 std::string substring1 = division_into_parts("Coding.txt");
 CodingRLE_MPI("ResultCodingTwice1", substring, world_rank, world_size);
-	
-//string v2 = Twice2(k4, C_rectangular);
+std::string substring2 = division_into_parts("CodingRLE.txt");
+CodingHuffmanNew(substring2,"ResultCodingTwice2", C_rectangular, world_rank, world_size) {
  if (world_rank == 0) {
 	std::ifstream input("ResultCodingTwice1.txt");
         std::string str;
@@ -646,6 +706,14 @@ CodingRLE_MPI("ResultCodingTwice1", substring, world_rank, world_size);
         }
         k3 = num;
 	cout << "Сompression ratio : " << 10000. / k3 << endl;
+	std::ifstream input("ResultCodingTwice2.txt");
+        std::string str;
+        int num = 0;
+
+        while (getline(input, str)) {
+            num += str.size();
+        }
+        k4 = num;
 	cout << "Сompression ratio : " << 10000. / k4 << endl;
  }
     MPI_Finalize();
