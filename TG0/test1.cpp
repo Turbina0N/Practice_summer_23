@@ -368,7 +368,7 @@ void CodingRLE_MPI(const std::string& filename, const std::string& substring, in
     }
 }
 
-void DecodingRLE_MPI(const std::string& input_filename, const std::string& output_filename, int world_rank, int world_size, const int& k2) {
+void DecodingRLE_MPI(const std::string& input_filename, const std::string& output_filename, int world_rank, int world_size, int& k2) {
     std::cout << std::endl;
     std::string encodedRLE;
     {
@@ -377,7 +377,7 @@ void DecodingRLE_MPI(const std::string& input_filename, const std::string& outpu
         ss << input.rdbuf();
         encodedRLE = ss.str();
     }
-    std::string decodedRLE = DecodingRLE(encodedRLE,k2);
+    std::string decodedRLE = DecodingRLE(encodedRLE, k2);
 
     if (world_rank == 0) {
         std::vector<std::string> results(world_size);
