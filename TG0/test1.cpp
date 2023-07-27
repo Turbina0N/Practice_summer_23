@@ -339,7 +339,35 @@ std::string division_into_parts(const std::string& filename) {
     return substring;
 }
 
+void CodingRLE_MPI(const std::string& filename, const std::string& substring, int world_rank, int world_size) {
+    std::cout << std::endl;
 
+    if (world_rank == 0) {
+        std::string encoded = CodingRLE(substring);
+        std::ofstream output(filename);
+        output << encoded;
+        std::ofstream output1(filename + "_part_" + std::to_string(world_rank) + ".txt");
+        output1 << encoded;
+        for (int i = 1; i < world_size; ++i) {
+            MPI_Status status;
+            MPI_Probe(i, 0, MPI_COMM_WORLD, &status);
+
+            int size;
+            MPI_Get_count(&status, MPI_CHAR, &size);
+
+            std::vector<char> received_data(size);
+            MPI_Recv(received_data.data(), size, MPI_CHAR, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+            std::string received_str(received_data.begin(), received_data.end());
+            output << received_str;
+        }
+    } else {
+        std::string encoded = CodingRLE(substring);
+        MPI_Send(encoded.data(), encoded.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD);
+        std::ofstream output1(filename + "_part_" + std::to_string(world_rank) + ".txt");
+        output1 << encoded;
+    }
+}
 
 
 
@@ -491,30 +519,6 @@ int main(int argc, char** argv) {
 
 	
 MPI_Barrier(MPI_COMM_WORLD);
-// std::vector<char> file_content;
-//     if (world_rank == 0) {
-//         file_content = readFile2("Library.txt");
-//     }
-
-//     int total_symbols = file_content.size();
-
-//     // Рассылаем total_symbols всем узлам
-//     MPI_Bcast(&total_symbols, 1, MPI_INT, 0, MPI_COMM_WORLD);
-
-//     // Теперь рассылаем содержимое файла всем узлам
-//     file_content.resize(total_symbols);
-//     MPI_Bcast(file_content.data(), total_symbols, MPI_CHAR, 0, MPI_COMM_WORLD);
-
-//     int base_process = total_symbols / world_size;
-//     int remainder = total_symbols % world_size;
-
-//     // Определение начала и конца обработки каждого процесса
-//     int start_symbol = world_rank * base_process + std::min(world_rank, remainder);
-//     int symbols_per_process = base_process + (world_rank < remainder ? 1 : 0);
-
-//     // Субстрока для этого процесса
-//     std::string substring(file_content.begin() + start_symbol, file_content.begin() + start_symbol + symbols_per_process);
-
 	
 std::string substring = division_into_parts("Library.txt");
     if (world_rank == 0) {
@@ -580,34 +584,7 @@ if (world_rank == 0) {
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////// CodingRLE
-	std::cout << std::endl;
-if (world_rank == 0) {
-	std::string encoded = CodingRLE(substring);
-	std::ofstream output("CodingRLE.txt");
-        output << encoded;
-	std::ofstream output1("CodingRLE_part_" + std::to_string(world_rank) + ".txt");
-        output1 << encoded;
-	for (int i = 1; i < world_size; ++i) {
-            MPI_Status status;
-            MPI_Probe(i, 0, MPI_COMM_WORLD, &status);
-
-            int size;
-            MPI_Get_count(&status, MPI_CHAR, &size);
-
-            std::vector<char> received_data(size);
-            MPI_Recv(received_data.data(), size, MPI_CHAR, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-
-            std::string received_str(received_data.begin(), received_data.end());
-            output << received_str;
-        }
-}
-else{
-	std::string encoded = CodingRLE(substring);
-	MPI_Send(encoded.data(), encoded.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD);
-	std::ofstream output1("CodingRLE_part_" + std::to_string(world_rank) + ".txt");
-        output1 << encoded;
-}
-
+CodingRLE_MPI("CodingRLE.txt", substring, world_rank, world_size)
 /////////////////////////////////////////////////////////////////////////////////////////////// DecodingRLE
     std::cout << std::endl;
     std::string encodedRLE;
@@ -637,9 +614,10 @@ else{
     } else {
         MPI_Send(decodedRLE.data(), decodedRLE.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD);
     }
+
+  if (world_rank == 0) {
 	bool flag2 = Check("Library.txt", "DecodingRLE.txt" );
 	std::cout << "CheckRLE:  " << flag2 << std::endl;
-  if (world_rank == 0) {
 	std::cout << "Сompression ratio RLE: " << 10000. / k2 << std::endl;
 	std::cout << "Сompression ratio : " << 10000. / k1 << std::endl;
   }
