@@ -368,6 +368,46 @@ void CodingRLE_MPI(const std::string& filename, const std::string& substring, in
     }
 }
 
+void DecodingRLE_MPI(const std::string& input_filename, const std::string& output_filename, int world_rank, int world_size, const int& k2) {
+    std::cout << std::endl;
+    std::string encodedRLE;
+    {
+        std::ifstream input(input_filename + "_part_" + std::to_string(world_rank) + ".txt");
+        std::stringstream ss;
+        ss << input.rdbuf();
+        encodedRLE = ss.str();
+    }
+    std::string decodedRLE = DecodingRLE(encodedRLE,k2);
+
+    if (world_rank == 0) {
+        std::vector<std::string> results(world_size);
+        results[0] = decodedRLE;
+
+        for (int i = 1; i < world_size; i++) {
+            MPI_Status status;
+            int result_size;
+            MPI_Recv(&result_size, 1, MPI_INT, i, 0, MPI_COMM_WORLD, &status);
+            char* buf = new char[result_size + 1];
+            MPI_Recv(buf, result_size, MPI_CHAR, i, 0, MPI_COMM_WORLD, &status);
+            buf[result_size] = '\0';
+            results[i] = std::string(buf);
+            delete[] buf;
+        }
+        // Combine the results and write them into one file
+        std::string combined_result;
+        for (const auto& res : results) {
+            combined_result += res;
+        }
+
+        std::ofstream output_file(output_filename + ".txt");
+        output_file <<  combined_result;
+        output_file.close();
+    } else {
+        int result_size = decodedRLE.size();
+        MPI_Send(&result_size, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
+        MPI_Send(decodedRLE.c_str(), result_size, MPI_CHAR, 0, 0, MPI_COMM_WORLD);
+    }
+}
 
 
 
@@ -516,7 +556,7 @@ int main(int argc, char** argv) {
     	// std::cout << std::endl;	
     }
 
-	
+//////////////////////////////////////////////////////////////////////////////////////////////////////	
 MPI_Barrier(MPI_COMM_WORLD);
 	
 std::string substring = division_into_parts("Library.txt");
@@ -585,34 +625,35 @@ if (world_rank == 0) {
 //////////////////////////////////////////////////////////////////////////////////////////// CodingRLE
 CodingRLE_MPI("CodingRLE", substring, world_rank, world_size);
 /////////////////////////////////////////////////////////////////////////////////////////////// DecodingRLE
-    std::cout << std::endl;
-    std::string encodedRLE;
-    {
-        std::ifstream input("CodingRLE_part_" + std::to_string(world_rank) + ".txt");
-        std::stringstream ss;
-        ss << input.rdbuf();
-        encodedRLE = ss.str();
-    }
-    std::string decodedRLE = DecodingRLE(encodedRLE,k2);
-    if (world_rank == 0) {
-        std::ofstream output("DecodingRLE.txt");
-        output << decodedRLE;
-        for (int i = 1; i < world_size; ++i) {
-            MPI_Status status;
-            MPI_Probe(i, 0, MPI_COMM_WORLD, &status);
+DecodingRLE_MPI("CodingRLE","DecodingRLE",world_rank,world_size,k2);
+    // std::cout << std::endl;
+    // std::string encodedRLE;
+    // {
+    //     std::ifstream input("CodingRLE_part_" + std::to_string(world_rank) + ".txt");
+    //     std::stringstream ss;
+    //     ss << input.rdbuf();
+    //     encodedRLE = ss.str();
+    // }
+    // std::string decodedRLE = DecodingRLE(encodedRLE,k2);
+    // if (world_rank == 0) {
+    //     std::ofstream output("DecodingRLE.txt");
+    //     output << decodedRLE;
+    //     for (int i = 1; i < world_size; ++i) {
+    //         MPI_Status status;
+    //         MPI_Probe(i, 0, MPI_COMM_WORLD, &status);
 
-            int size;
-            MPI_Get_count(&status, MPI_CHAR, &size);
+    //         int size;
+    //         MPI_Get_count(&status, MPI_CHAR, &size);
 
-            std::vector<char> received_data(size);
-            MPI_Recv(received_data.data(), size, MPI_CHAR, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    //         std::vector<char> received_data(size);
+    //         MPI_Recv(received_data.data(), size, MPI_CHAR, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-            std::string received_str(received_data.begin(), received_data.end());
-            output << received_str;
-        }
-    } else {
-        MPI_Send(decodedRLE.data(), decodedRLE.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD);
-    }
+    //         std::string received_str(received_data.begin(), received_data.end());
+    //         output << received_str;
+    //     }
+    // } else {
+    //     MPI_Send(decodedRLE.data(), decodedRLE.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD);
+    // }
 
   if (world_rank == 0) {
 	bool flag2 = Check("Library.txt", "DecodingRLE.txt" );
