@@ -770,14 +770,14 @@ CodingHuffmanNew(substring2,"ResultCodingTwice2", C_rectangular, world_rank, wor
         }
         k3 = num;
 	cout << "Сompression ratio : " << 10000. / k3 << endl;
-	std::ifstream input("ResultCodingTwice2.txt");
-        std::string str;
-        int num = 0;
+	std::ifstream input1("ResultCodingTwice2.txt");
+        std::string str1;
+        int num1 = 0;
 
-        while (getline(input, str)) {
-            num += str.size();
+        while (getline(input1, str1)) {
+            num1 += str1.size();
         }
-        k4 = num;
+        k4 = num1;
 	cout << "Сompression ratio : " << 10000. / k4 << endl;
  }
     MPI_Finalize();
