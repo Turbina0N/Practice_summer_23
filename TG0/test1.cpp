@@ -310,6 +310,35 @@ bool Check(string s_input, string m_output) {
 	return flag;
 }
 
+std::string division_into_parts(const std::string& filename) {
+    int world_rank, world_size;
+    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+
+    MPI_Barrier(MPI_COMM_WORLD);
+    std::vector<char> file_content;
+    if (world_rank == 0) {
+        file_content = readFile2(filename);
+    }
+
+    int total_symbols = file_content.size();
+
+    MPI_Bcast(&total_symbols, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+    file_content.resize(total_symbols);
+    MPI_Bcast(file_content.data(), total_symbols, MPI_CHAR, 0, MPI_COMM_WORLD);
+
+    int base_process = total_symbols / world_size;
+    int remainder = total_symbols % world_size;
+
+    int start_symbol = world_rank * base_process + std::min(world_rank, remainder);
+    int symbols_per_process = base_process + (world_rank < remainder ? 1 : 0);
+
+    std::string substring(file_content.begin() + start_symbol, file_content.begin() + start_symbol + symbols_per_process);
+    
+    return substring;
+}
+
 
 
 
@@ -462,32 +491,32 @@ int main(int argc, char** argv) {
 
 	
 MPI_Barrier(MPI_COMM_WORLD);
-std::vector<char> file_content;
-    if (world_rank == 0) {
-        file_content = readFile2("Library.txt");
-    }
+// std::vector<char> file_content;
+//     if (world_rank == 0) {
+//         file_content = readFile2("Library.txt");
+//     }
 
-    int total_symbols = file_content.size();
+//     int total_symbols = file_content.size();
 
-    // Рассылаем total_symbols всем узлам
-    MPI_Bcast(&total_symbols, 1, MPI_INT, 0, MPI_COMM_WORLD);
+//     // Рассылаем total_symbols всем узлам
+//     MPI_Bcast(&total_symbols, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
-    // Теперь рассылаем содержимое файла всем узлам
-    file_content.resize(total_symbols);
-    MPI_Bcast(file_content.data(), total_symbols, MPI_CHAR, 0, MPI_COMM_WORLD);
+//     // Теперь рассылаем содержимое файла всем узлам
+//     file_content.resize(total_symbols);
+//     MPI_Bcast(file_content.data(), total_symbols, MPI_CHAR, 0, MPI_COMM_WORLD);
 
-    int base_process = total_symbols / world_size;
-    int remainder = total_symbols % world_size;
+//     int base_process = total_symbols / world_size;
+//     int remainder = total_symbols % world_size;
 
-    // Определение начала и конца обработки каждого процесса
-    int start_symbol = world_rank * base_process + std::min(world_rank, remainder);
-    int symbols_per_process = base_process + (world_rank < remainder ? 1 : 0);
+//     // Определение начала и конца обработки каждого процесса
+//     int start_symbol = world_rank * base_process + std::min(world_rank, remainder);
+//     int symbols_per_process = base_process + (world_rank < remainder ? 1 : 0);
 
-    // Субстрока для этого процесса
-    std::string substring(file_content.begin() + start_symbol, file_content.begin() + start_symbol + symbols_per_process);
+//     // Субстрока для этого процесса
+//     std::string substring(file_content.begin() + start_symbol, file_content.begin() + start_symbol + symbols_per_process);
 
-    // Здесь ваш код для создания C_rectangular
-
+	
+std::string substring = division_into_parts("Library.txt");
     if (world_rank == 0) {
         std::string encoded = CodingHuffman("Coding", C_rectangular, substring);
         for (int i = 1; i < world_size; ++i) {
@@ -551,6 +580,7 @@ if (world_rank == 0) {
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////// CodingRLE
+	std::cout << std::endl;
 if (world_rank == 0) {
 	std::string encoded = CodingRLE(substring);
 	std::ofstream output("CodingRLE.txt");
@@ -579,6 +609,7 @@ else{
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////// DecodingRLE
+    std::cout << std::endl;
     std::string encodedRLE;
     {
         std::ifstream input("CodingRLE_part_" + std::to_string(world_rank) + ".txt");
