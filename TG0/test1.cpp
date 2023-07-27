@@ -206,7 +206,7 @@ std::string CodingRLE(std::string chunk) {
 }
 
 std::string DecodingRLE(const std::string& input_string, int& k) {
-    k = input_string.size();
+    k += input_string.size();
     std::string result;
     char symbol;
     int count;
