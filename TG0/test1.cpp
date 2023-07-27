@@ -608,8 +608,10 @@ else{
     }
 	bool flag2 = Check("Library.txt", "DecodingRLE.txt" );
 	std::cout << "CheckRLE:  " << flag2 << std::endl;
+  if (world_rank == 0) {
 	std::cout << "Сompression ratio RLE: " << 10000. / k2 << std::endl;
 	std::cout << "Сompression ratio : " << 10000. / k1 << std::endl;
+  }
     MPI_Finalize();
     return 0;
 }
