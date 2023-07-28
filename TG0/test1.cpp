@@ -571,13 +571,13 @@ int main(int argc, char** argv) {
 	C_rectangular = transform_to_rectangle(C);
 	int numRows = C_rectangular.size();
         int numCols = C_rectangular[0].size();
-	for (const auto& row : C_rectangular) {
-        for (int val : row) {
-            std::cout << val << ' ';
-        }
-        std::cout << '\n';
-    	}	
-    	std::cout << std::endl;
+	// for (const auto& row : C_rectangular) {
+ //        for (int val : row) {
+ //            std::cout << val << ' ';
+ //        }
+ //        std::cout << '\n';
+ //    	}	
+ //    	std::cout << std::endl;
 
 	for (int i = 1; i < world_size; ++i) {
 	MPI_Send(&numRows, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
