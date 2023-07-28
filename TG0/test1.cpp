@@ -694,8 +694,8 @@ DecodingRLE_MPI("CodingRLE","DecodingRLE",world_rank,world_size,k2);
   if (world_rank == 0) {
 	bool flag2 = Check("Library.txt", "DecodingRLE.txt");
 	std::cout << "CheckRLE:  " << flag2 << std::endl;
-	std::cout << "Сompression ratio RLE: " << 10000. / k2 << std::endl;
-	std::cout << "Сompression ratio : " << 10000. / k1 << std::endl;
+	//std::cout << "Сompression ratio RLE: " << 10000. / k2 << std::endl;
+	//td::cout << "Сompression ratio : " << 10000. / k1 << std::endl;
   }
 
 std::string substring1 = division_into_parts("Coding.txt");
@@ -711,7 +711,7 @@ CodingHuffmanNew(substring2,"ResultCodingTwice2", C_rectangular, world_rank, wor
             num += str.size();
         }
         k3 = num;
-	cout << "Сompression ratio : " << 10000. / k3 << endl;
+	//cout << "Сompression ratio : " << 10000. / k3 << endl;
 	std::ifstream input1("ResultCodingTwice2.txt");
         std::string str1;
         int num1 = 0;
@@ -720,7 +720,7 @@ CodingHuffmanNew(substring2,"ResultCodingTwice2", C_rectangular, world_rank, wor
             num1 += str1.size();
         }
         k4 = num1;
-	cout << "Сompression ratio : " << 10000. / k4 << endl;
+	//cout << "Сompression ratio : " << 10000. / k4 << endl;
  }
     MPI_Finalize();
     return 0;
